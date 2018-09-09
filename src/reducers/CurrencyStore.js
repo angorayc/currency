@@ -14,21 +14,21 @@ const initialTo = {
   currencyCode: defaultExchangeTo,
   exchangeType: 'to',
   currencyName: configs.currency[defaultExchangeTo],
-  exchangeAmount: 0,
+  exchangeAmount: '',
   balance: 0
 }
 const exchangeFrom = function(state = initialFrom, action) {
-  let exchangeAmount = action.exchangeAmount || initialFrom.exchangeAmount
-
+  let exchangeAmount = action.exchangeAmount ? parseFloat(action.exchangeAmount, 10) : action.exchangeAmount
+  let currencyCode = action.currencyCode
   switch (action.type) {
     case actions.SELECT_FROM_CURRENCY:
       return Object.assign({}, state, {
-        currencyCode: action.currencyCode,
-        currencyName: configs.currency[action.currencyCode]
+        currencyCode: currencyCode,
+        currencyName: configs.currency[currencyCode]
       })
     case actions.INPUT_FROM_AMOUNT:
 
-      exchangeAmount = parseFloat(action.exchangeAmount, 10)
+      // exchangeAmount = exchangeAmount ? parseFloat(action.exchangeAmount, 10) : action.exchangeAmount
 
       return Object.assign({}, state, {
         exchangeAmount: exchangeAmount,
@@ -39,16 +39,15 @@ const exchangeFrom = function(state = initialFrom, action) {
   }
 }
 const exchangeTo = function(state = initialTo, action) {
-  let exchangeAmount = action.exchangeAmount || initialFrom.exchangeAmount
-
+  let exchangeAmount = action.exchangeAmount ? parseFloat(action.exchangeAmount, 10) : action.exchangeAmount
+  let currencyCode = action.currencyCode
   switch (action.type) {
     case actions.SELECT_TO_CURRENCY:
       return Object.assign({}, state, {
-        currencyCode: action.currencyCode,
-        currencyName: configs.currency[action.currencyCode]
+        currencyCode: currencyCode,
+        currencyName: configs.currency[currencyCode]
       })
     case actions.INPUT_TO_AMOUNT:
-      exchangeAmount = parseFloat(action.exchangeAmount, 10)
 
       return Object.assign({}, state, {
         exchangeAmount: exchangeAmount,

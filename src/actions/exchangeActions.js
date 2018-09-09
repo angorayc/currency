@@ -30,17 +30,14 @@ let timer
 
 
 export const getRate = () => {
-      console.log('---2---')
 
   return (dispatch, getState) => {
     dispatch(getRateStart())
-    console.log('---2a---')
     let storeState = getState()
     let base = storeState.currency.exchangeFrom.currencyName
     let baseCode = parseInt(storeState.currency.exchangeFrom.currencyCode, 10)
     let symbols = Object.keys(configs.currency).reduce((acc, currCode) => {
       let currName = configs.currency[currCode]
-      console.log('xxx', currCode, baseCode, acc, currName)
 
       return (parseInt(currCode, 10) !== baseCode && acc.indexOf(currName) < 0) ? acc.concat([currName]) : acc
     }, []).join(',')

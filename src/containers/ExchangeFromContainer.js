@@ -5,7 +5,7 @@ import { handleFromCurrencyChanged, handleFromAmountInput } from '../actions/cur
 const mapStateToProps = state => {
   let exchangeFrom = state.currency.exchangeFrom || {}
   return {
-    currencyCode: exchangeFrom.exchageCode,
+    currencyCode: exchangeFrom.currencyCode,
     currencyName: exchangeFrom.currencyName,
     exchangeType: exchangeFrom.exchangeType,
     exchangeAmount: exchangeFrom.exchangeAmount,
@@ -15,8 +15,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    onCurrencyChange: (value, exchangeType) => {
-      dispatch(handleFromCurrencyChanged(value, exchangeType))
+    onCurrencyChange: (currencyCode) => {
+      dispatch(handleFromCurrencyChanged(currencyCode))
     },
     onAmountChange: (value) => {
       dispatch(handleFromAmountInput(value))

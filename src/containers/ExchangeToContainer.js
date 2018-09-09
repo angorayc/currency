@@ -23,9 +23,9 @@ const mapDispatchToProps = dispatch => {
     }
   }
 }
-const ExchangeFromContainer = connect(
+const ExchangeToContainer = connect(
   mapStateToProps,
   mapDispatchToProps
 )(Currency)
 
-export default ExchangeFromContainer
+export default ExchangeToContainer

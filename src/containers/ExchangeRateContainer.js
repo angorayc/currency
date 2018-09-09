@@ -1,6 +1,7 @@
 import { connect } from 'react-redux'
 import ExchangeRate from '../components/ExchangeRate'
 import { getRateTimerStart, getRateTimerStop } from '../actions/exchangeActions'
+import { swapCurrency } from '../actions/currencyActions'
 
 const mapStateToProps = state => {
   return {}
@@ -13,6 +14,9 @@ const mapDispatchToProps = dispatch => {
     },
     getRateStop: () => {
       dispatch(getRateTimerStop())
+    },
+    onSwapBtnClicked: () => {
+      dispatch(swapCurrency())
     }
   }
 }

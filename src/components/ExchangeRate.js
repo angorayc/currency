@@ -23,10 +23,16 @@ export default class ExchangeRate extends React.Component {
     this.props.getRateStop()
   }
 
+  _handleSwapBtnClicked = event => {
+    let { onSwapBtnClicked } = this.props
+    if (typeof onSwapBtnClicked === 'function')
+      onSwapBtnClicked()
+  }
+
   render() {
     return (
       <div>
-        <IconButton variant="fab" color="primary">
+        <IconButton variant="fab" color="primary" onClick={this._handleSwapBtnClicked}>
           <ImportExportIcon />
         </IconButton>
         <Divider />
