@@ -5,12 +5,15 @@ import { swapCurrency } from '../actions/currencyActions'
 
 const mapStateToProps = state => {
   let exchangeFrom = state.currency.exchangeFrom
-  let rates = state.exchange.data && state.exchange.data.rates || {}
+  let sourceCurrencyName = exchangeFrom.currencyName
+  let data = state.exchange.data || {}
+  let matchBase = data.base === sourceCurrencyName
+  let rates = matchBase ? data.rates : {}
+  let targetCurrencyName = state.currency.exchangeTo.currencyName
   return {
-    enableExchangeBtn: exchangeFrom.exchangeAmount > 0,
-    exchangeRate: rates[exchangeFrom.currencyName],
-    currencyFromName: exchangeFrom.currencyName,
-    currencyToName: state.currency.exchangeTo.currencyName
+    exchangeRate: rates[targetCurrencyName],
+    currencyFromName: sourceCurrencyName,
+    currencyToName: targetCurrencyName
   }
 }
 
