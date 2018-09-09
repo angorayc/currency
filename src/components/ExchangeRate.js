@@ -47,7 +47,11 @@ export default class ExchangeRate extends React.Component {
               <TrendingUpIcon />
               <span className={currencyFromName}>1</span>
               <span className="rate-eq">=</span>
-              <span className={currencyToName}>{exchangeRate}</span>
+              <span className={currencyToName}>
+                { exchangeRate.split('').map((digit, idx) => <span key={`exchange-${digit}`} className="exchange-digit">
+                  {digit}</span>)
+                }
+              </span>
             </Button>
           </span>) : null
         }

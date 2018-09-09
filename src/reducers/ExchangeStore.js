@@ -8,10 +8,18 @@ const exchangeRate = function(state = { data: null, error: null }, action) {
         error: null
       }
     case actions.GET_RATE_SUCCESS:
+    {
+      let rates = action.data.rates || {}
+      let fixed = {}
+      Object.keys(rates).forEach((currencyCode) => {
+        fixed[currencyCode] = Number.parseFloat(rates[currencyCode]).toFixed(4)
+      })
+      action.data.rates = fixed
       return {
         data: action.data || {},
         error: null
       }
+    }
     case actions.GET_RATE_FAILURE:
       return {
         data: null,

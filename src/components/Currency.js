@@ -38,6 +38,7 @@ class Currency extends React.Component {
 
   render() {
     let { currencyCode, exchangeType, balance } = this.props
+    let currencyName = configs.currency[currencyCode]
     let exchangeAmount = ''
     return (
       <div className="Px-12">
@@ -46,12 +47,14 @@ class Currency extends React.Component {
             <NativeSelect
               value={currencyCode}
               onChange={this._handleCurrencyChange(exchangeType)}
-              input={<Input name={exchangeType} id={exchangeType} value={configs.currency[currencyCode]}/>}
+              input={<Input name={exchangeType} id={exchangeType} value={currencyName}/>}
             >
               { Object.keys(configs.currency).map((c) => <option key={configs.currency[c]} value={c}>{configs.currency[c]}</option>)}
               
             </NativeSelect>
-            <FormHelperText>Balance: {balance}</FormHelperText>
+            <FormHelperText>
+              Balance: <span className={currencyName}>{balance}</span>
+            </FormHelperText>
             { exchangeAmount ? <span className={`exchange-${exchangeType}`}></span> : null }
             {/*<Input value={exchangeAmount} onChange={this._handleAmountChange} placeholder="0" type="number"/>*/}
           </FormControl>

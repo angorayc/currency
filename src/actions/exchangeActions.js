@@ -5,6 +5,7 @@ export const GET_RATE_SUCCESS = 'GET_RATE_SUCCESS'
 export const GET_RATE_FAILURE = 'GET_RATE_FAILURE'
 export const START_RATE_TIMER = 'START_RATE_TIMER'
 export const CLEAR_RATE_TIMER = 'CLEAR_RATE_TIMER'
+export const EXCHANGE_SUBMIT = 'EXCHANGE_SUBMIT'
 
 const getRateStart = () => {
   return {
@@ -91,5 +92,11 @@ export const getRateTimerRestart = () => {
       .then(() => {
         dispatch(getRateTimerStart())
       })
+  }
+}
+
+export const handleExchangeSubmit = () => {
+  return {
+    type: EXCHANGE_SUBMIT
   }
 }
