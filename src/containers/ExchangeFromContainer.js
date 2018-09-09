@@ -1,15 +1,19 @@
 import { connect } from 'react-redux'
 import Currency from '../components/Currency'
 import { handleFromCurrencyChanged, handleFromAmountInput } from '../actions/currencyActions'
+import { get as _get } from 'lodash'
 
 const mapStateToProps = state => {
-  let exchangeFrom = state.currency.exchangeFrom || {}
+  let exchangeFrom = _get(state.currency, 'exchangeFrom', {})
+  let exchangeBaseName = _get(state.exchange, 'data.base')
   return {
     currencyCode: exchangeFrom.currencyCode,
     currencyName: exchangeFrom.currencyName,
     exchangeType: exchangeFrom.exchangeType,
     exchangeAmount: exchangeFrom.exchangeAmount,
-    balance: exchangeFrom.balance
+    balance: exchangeFrom.balance,
+    enableAmountInput: exchangeBaseName === exchangeFrom.currencyName,
+    isActive: state.currency.isExchangeFromFocused
   }
 }
 

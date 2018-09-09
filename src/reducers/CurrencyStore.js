@@ -57,8 +57,18 @@ const exchangeTo = function(state = initialTo, action) {
   }
 }
 
+const isExchangeFromFocused = function(state = true, action) {
+  switch (action.type) {
+    case actions.SWAP_CURRENCY:
+      return !state
+    default:
+      return state
+  }
+}
+
 const CurrencyStore = combineReducers({
   exchangeFrom,
-  exchangeTo
+  exchangeTo,
+  isExchangeFromFocused
 })
 export default CurrencyStore

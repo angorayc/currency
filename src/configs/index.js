@@ -1,7 +1,9 @@
 import currency from './currency'
+import exchange from './exchange'
 
 const configs = {
-  currency
+  currency,
+  exchange
 }
 
 export default configs

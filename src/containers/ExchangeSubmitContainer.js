@@ -1,16 +1,19 @@
 import { connect } from 'react-redux'
 import ExchangeSubmitBtn from '../components/ExchangeSubmitBtn'
 import { handleExchangeSubmit } from '../actions/exchangeActions'
+import configs from '../configs'
+import { get as _get } from 'lodash'
+
 
 const mapStateToProps = state => {
-  let exchangeFrom = state.currency.exchangeFrom
-  let sourceCurrencyName = exchangeFrom.currencyName
-  let data = state.exchange.data || {}
-  let matchBase = data.base === sourceCurrencyName
-  let rates = matchBase ? data.rates : {}
-  let targetCurrencyName = state.currency.exchangeTo.currencyName
+  let sourceCurrencyName = _get(state.currency, 'exchangeFrom.currencyName')
+  let matchBase = _get(state.exchange, 'data.base') === sourceCurrencyName
+  let rates = matchBase ? _get(state.exchange, 'data.rates', {}) : {}
+  let targetCurrencyName = _get(state.currency, 'exchangeTo.currencyName')
+  let targetRate = _get(rates, targetCurrencyName)
+  let exchangeAmount = _get(state.currency, 'exchangeFrom.exchangeAmount')
   return {
-    enableExchangeBtn: rates[targetCurrencyName] ? true : false
+    enableExchangeBtn: targetRate && exchangeAmount > configs.exchange.MIN_EXCHANGE_AMOUNT
   }
 }
 

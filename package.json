@@ -5,7 +5,10 @@
   "dependencies": {
     "@material-ui/core": "^3.0.2",
     "@material-ui/icons": "^3.0.1",
+    "classnames": "^2.2.6",
     "gh-pages": "^1.2.0",
+    "lodash": "^4.17.10",
+    "numeral": "^2.0.6",
     "react": "^16.5.0",
     "react-dom": "^16.5.0",
     "react-redux": "^5.0.7",

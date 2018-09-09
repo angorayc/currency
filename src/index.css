@@ -62,6 +62,12 @@ body {
   position: relative;
 }
 
+.exchange-select {
+  width: 100%;
+  padding-right: 8px !important;
+  box-sizing: border-box;
+}
+
 .exchange-swap {
   position: absolute;
   left: 0;
@@ -78,4 +84,9 @@ body {
 
 .exchange-amount input{
   text-align: right;
+}
+
+.exchange-hint {
+  color: red !important;
+  text-align: right !important;
 }

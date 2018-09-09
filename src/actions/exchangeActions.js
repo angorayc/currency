@@ -55,11 +55,12 @@ export const getRate = () => {
     return Promise.resolve({
       "success": true,
       "timestamp": 1536479948,
-      "base": "EUR",
+      "base": base,
       "date": "2018-09-09",
       "rates": {
           "GBP": 0.895555,
-          "USD": 1.157152
+          "USD": 1.157152,
+          "EUR": 1.222222
       }
     }).then((data) => {
       dispatch(getRateSuccess(data))

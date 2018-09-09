@@ -6,8 +6,8 @@ import FormHelperText from '@material-ui/core/FormHelperText'
 import FormControl from '@material-ui/core/FormControl'
 import NativeSelect from '@material-ui/core/NativeSelect'
 import Grid from '@material-ui/core/Grid'
-
 import configs from '../configs'
+import classnames from 'classnames'
 
 class Currency extends React.Component {
 
@@ -50,19 +50,29 @@ class Currency extends React.Component {
     this.setState({ exchangeAmount: amount })
   }
 
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (parseFloat(nextProps.exchangeAmount, 10) !== parseFloat(prevState.exchangeAmount, 10)) {
+      return {
+        exchangeAmount: nextProps.exchangeAmount
+      }
+    }
+    return null
+  }
 
 
   render() {
-    let { currencyCode, exchangeType, balance } = this.props
+    let { currencyCode, exchangeType, balance, enableAmountInput, isActive } = this.props
     let currencyName = configs.currency[currencyCode]
     let { exchangeAmount, symbol } = this.state
     let displayAmount = exchangeAmount === '' ? exchangeAmount : `${symbol}${exchangeAmount}`
+    let showHint = exchangeAmount > 0 && exchangeAmount < configs.exchange.MIN_EXCHANGE_AMOUNT
+    let balanceClassNames = classnames({ 'exchange-hint': exchangeAmount > balance && isActive })
     return (
       <div className="Px-12">
         <List component="nav">
           <Grid container>
             <Grid item xs={3}>
-              <FormControl>
+              <FormControl className="exchange-select">
                 <NativeSelect
                   value={currencyCode}
                   onChange={this._handleCurrencyChange(exchangeType)}
@@ -71,17 +81,22 @@ class Currency extends React.Component {
                   { Object.keys(configs.currency).map((c) => <option key={configs.currency[c]} value={c}>{configs.currency[c]}</option>)}
                   
                 </NativeSelect>
-                <FormHelperText>
+                <FormHelperText className={balanceClassNames}>
                   Balance: <span className={currencyName}>{balance}</span>
                 </FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={9}>
               <Input className="exchange-amount"
-                fullWidth={true} autoFocus={exchangeType === 'from'} 
+                fullWidth={true}
+                autoFocus={isActive}
                 placeholder="0"
                 value={displayAmount}
-                onChange={this._handleAmountChange} />
+                onChange={this._handleAmountChange}
+                disabled={!enableAmountInput} />
+              { showHint && isActive ? <FormHelperText className="exchange-hint">
+                  Minimun amount is <span className={currencyName}>{configs.exchange.MIN_EXCHANGE_AMOUNT}</span>
+                  </FormHelperText> : null }
             </Grid>
           </Grid>
         </List>

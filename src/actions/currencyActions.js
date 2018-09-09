@@ -1,5 +1,7 @@
 import { getRateTimerRestart } from './exchangeActions'
 import configs from '../configs'
+import { get as _get } from 'lodash'
+import numeral from 'numeral'
 
 export const SELECT_FROM_CURRENCY = 'SELECT_FROM_CURRENCY'
 export const SELECT_TO_CURRENCY = 'SELECT_TO_CURRENCY'
@@ -25,22 +27,32 @@ export const currencyToSwitched = (currencyCode) => {
 
 export const swapCurrency = () => {
   return (dispatch, getState) => {
-    //dispatch({ type: SWAP_CURRENCY })
+    
     let storeState = getState()
-    let exchangeFrom = storeState.currency.exchangeFrom.currencyCode
-    let exchangeTo = storeState.currency.exchangeTo.currencyCode
+    let exchangeFrom = _get(storeState.currency, 'exchangeFrom.currencyCode')
+    let exchangeTo = _get(storeState.currency, 'exchangeTo.currencyCode')
+
+    let sourceAmount = storeState.currency.isExchangeFromFocused ? 'exchangeFrom' : 'exchangeTo'
+    let baseAmount = _get(storeState.currency, `${sourceAmount}.exchangeAmount`)
+
     return Promise.all([
+      dispatch({ type: SWAP_CURRENCY }),
       dispatch(handleFromCurrencyChanged(exchangeTo)),
       dispatch(handleToCurrencyChanged(exchangeFrom))
-    ])
+    ]).then(() => {
+      if (storeState.currency.isExchangeFromFocused)
+        dispatch(handleToAmountInput(baseAmount))
+      else
+        dispatch(handleFromAmountInput(baseAmount))
+    })
   }
 }
 
 export const handleFromCurrencyChanged = (currencyCode) => {
   return (dispatch, getState) => {
     let storeState = getState()
-    let exchangeFrom = storeState.currency.exchangeFrom.currencyCode
-    let exchangeTo = storeState.currency.exchangeTo.currencyCode
+    let exchangeFrom = _get(storeState.currency, 'exchangeFrom.currencyCode')
+    let exchangeTo = _get(storeState.currency, 'exchangeTo.currencyCode')
 
     return Promise.resolve(dispatch(currencyFromSwitched(currencyCode)))
       .then(() => {
@@ -69,17 +81,66 @@ export const handleToCurrencyChanged = (currencyCode) => {
   }
 }
 
+const updateSourceAmount = (exchangeAmount) => {
+  return { type: INPUT_FROM_AMOUNT, exchangeAmount }
+}
+
+const updateTargetAmount = (exchangeAmount) => {
+  return { type: INPUT_TO_AMOUNT, exchangeAmount }
+}
+
+
 export const handleFromAmountInput = (exchangeAmount) => {
-  return {
-    type: INPUT_FROM_AMOUNT,
-    exchangeAmount
+
+  return (dispatch, getState) => {
+    let storeState = getState()
+    let sourceCurrencyName = _get(storeState.currency, 'exchangeFrom.currencyName')
+    let matchBase = _get(storeState.exchange, 'data.base') === sourceCurrencyName
+    let rates = matchBase ? _get(storeState.exchange, 'data.rates', {}) : {}
+    let targetCurrencyName = _get(storeState.currency, 'exchangeTo.currencyName')
+    let targetRate = _get(rates, targetCurrencyName)
+    let expectAmount = targetRate ? ((exchangeAmount || 0) * targetRate) : ''
+    expectAmount = expectAmount > 0 ? numeral(expectAmount).format('0.00') : ''
+
+    return new Promise((resolve, reject) => {
+      if (targetRate)
+        resolve(dispatch(updateSourceAmount(exchangeAmount)))
+      else {
+        setTimeout(() => {
+          dispatch(handleFromAmountInput(exchangeAmount))
+        }, 1000 * 0.5)
+      }
+    })
+    .then(() => {
+      dispatch(updateTargetAmount(expectAmount))
+    })
   }
 }
 
 export const handleToAmountInput = (exchangeAmount) => {
-  return {
-    type: INPUT_TO_AMOUNT,
-    exchangeAmount
+  
+  return (dispatch, getState) => {
+    let storeState = getState()
+    let sourceCurrencyName = _get(storeState.currency, 'exchangeFrom.currencyName')
+    let matchBase = _get(storeState.exchange, 'data.base') === sourceCurrencyName
+    let rates = matchBase ? _get(storeState.exchange, 'data.rates', {}) : {}
+    let targetCurrencyName = _get(storeState.currency, 'exchangeTo.currencyName')
+    let targetRate = _get(rates, targetCurrencyName)
+    let expectAmount = targetRate ? ((exchangeAmount || 0) / targetRate) : ''
+    expectAmount = parseFloat(expectAmount, 10) > 0 ? numeral(expectAmount).format('0.00') : ''
+
+    return new Promise((resolve, reject) => {
+      if (targetRate)
+        resolve(dispatch(updateTargetAmount(exchangeAmount)))
+      else {
+        setTimeout(() => {
+          dispatch(handleToAmountInput(exchangeAmount))
+        }, 1000 * 0.5)
+      }
+    })
+    .then(() => {
+      dispatch(updateSourceAmount(expectAmount))
+    })
   }
 }
 
