@@ -1,15 +1,18 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import List from '@material-ui/core/List'
-// import { withStyles } from '@material-ui/core/styles';
-import Input from '@material-ui/core/Input';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-// import Select from '@material-ui/core/Select';
-import NativeSelect from '@material-ui/core/NativeSelect';
+import Input from '@material-ui/core/Input'
+import FormHelperText from '@material-ui/core/FormHelperText'
+import FormControl from '@material-ui/core/FormControl'
+import NativeSelect from '@material-ui/core/NativeSelect'
 import configs from '../configs'
 
 class Currency extends React.Component {
+
+  constructor(props) {
+    super(props)
+    this.state = { exchangeAmount: props.exchangeAmount }
+  }
 
   _handleCurrencyChange = name => event => {
     let currencyCode = event.target.value
@@ -21,11 +24,21 @@ class Currency extends React.Component {
 
   _handleAmountChange = event => {
     let amount = event.target.value
+    if(amount === '.')
+      amount = `0.`
+    else {
+      if (amount.length > 1 && amount.indexOf('0') === 0 && amount.indexOf('.') === -1)
+        amount = amount.slice(1)  
+    }
+    
+
     this.props.onAmountChange(amount)
+    this.setState({ exchangeAmount: amount })
   }
 
   render() {
-    let { currencyCode, exchangeType, exchangeAmount, balance } = this.props
+    let { currencyCode, exchangeType, balance } = this.props
+    let { exchangeAmount } = this.state
     return (
       <List component="nav">
         <FormControl>
@@ -38,7 +51,8 @@ class Currency extends React.Component {
             
           </NativeSelect>
           <FormHelperText>Balance: {balance}</FormHelperText>
-          <Input value={exchangeAmount} onChange={this._handleAmountChange} type="number"/>
+          { exchangeAmount ? <span className={`exchange-${exchangeType}`}></span> : null }
+          <Input value={exchangeAmount} onChange={this._handleAmountChange} placeholder="0" />
         </FormControl>
       </List>
     )
@@ -48,9 +62,8 @@ class Currency extends React.Component {
 Currency.propTypes = {
   onCurrencyChange: PropTypes.func,
   currencyCode: PropTypes.number,
-  // currencyName: PropTypes.oneOf(['GBP', 'EUR', 'USD']),
   currencyType: PropTypes.oneOf(['From', 'To']),
-  exchangeAmount: PropTypes.number,
+  exchangeAmount: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   balance:PropTypes.number
 }
 

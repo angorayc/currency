@@ -1,13 +1,13 @@
 import { connect } from 'react-redux'
 import Currency from '../components/Currency'
-import { handleToCurrencyChanged, handleToAmountInput } from '../actions/exchangeActions'
+import { handleToCurrencyChanged, handleToAmountInput } from '../actions/currencyActions'
 
 const mapStateToProps = state => {
   let exchangeTo = state.currency.exchangeTo || {}
   return {
     currencyCode: exchangeTo.currencyCode,
     currencyName: exchangeTo.currencyName,
-    exchangeType: exchangeTo.exchageType,
+    exchangeType: exchangeTo.exchangeType,
     exchangeAmount: exchangeTo.exchangeAmount,
     balance: exchangeTo.balance
   }

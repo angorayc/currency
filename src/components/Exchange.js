@@ -1,15 +1,16 @@
 import React from 'react'
+import Header from './Header'
 import ExchangeFromContainer from '../containers/ExchangeFromContainer'
 import ExchangeToContainer from '../containers/ExchangeToContainer'
-import Divider from '@material-ui/core/Divider'
+import ExchangeRateContainer from '../containers/ExchangeRateContainer'
 
 class Exchange extends React.Component {
   render() {
     return (
       <div>
-        <div>Exchange</div>
+        <Header />
         <ExchangeFromContainer />
-        <Divider />
+        <ExchangeRateContainer />
         <ExchangeToContainer />
       </div>
     )
