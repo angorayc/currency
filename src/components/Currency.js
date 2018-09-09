@@ -27,13 +27,19 @@ class Currency extends React.Component {
   _handleAmountChange = event => {
     let { onAmountChange } = this.props
     let amount = event.target.value
+    let matches
 
     if (amount !== '') {
       
-      if(amount === '.')
-        amount = `0.`
-      else if (amount.match(/^[+-]/))
-        amount = amount.slice(1)
+      
+        if(amount === '.')
+          amount = `0.`
+        else if (amount.match(/^[+-]/))
+          amount = amount.slice(1)
+        
+        matches = (amount.match(/\D/g) || []).filter((m) => m !== '.')
+        if(matches.length)
+          amount = amount.slice(0, -1)
 
       if (amount.match(/^0\d{1,}/)) {
         amount = amount.slice(1)
@@ -68,7 +74,6 @@ class Currency extends React.Component {
                 <FormHelperText>
                   Balance: <span className={currencyName}>{balance}</span>
                 </FormHelperText>
-                { /*exchangeAmount ? <span className={`exchange-${exchangeType}`}></span> : null */}
               </FormControl>
             </Grid>
             <Grid item xs={9}>
