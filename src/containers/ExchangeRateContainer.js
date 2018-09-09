@@ -4,7 +4,14 @@ import { getRateTimerStart, getRateTimerStop } from '../actions/exchangeActions'
 import { swapCurrency } from '../actions/currencyActions'
 
 const mapStateToProps = state => {
-  return {}
+  let exchangeFrom = state.currency.exchangeFrom
+  let rates = state.exchange.data && state.exchange.data.rates || {}
+  return {
+    enableExchangeBtn: exchangeFrom.exchangeAmount > 0,
+    exchangeRate: rates[exchangeFrom.currencyName],
+    currencyFromName: exchangeFrom.currencyName,
+    currencyToName: state.currency.exchangeTo.currencyName
+  }
 }
 
 const mapDispatchToProps = dispatch => {

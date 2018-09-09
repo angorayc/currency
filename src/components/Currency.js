@@ -5,6 +5,7 @@ import Input from '@material-ui/core/Input'
 import FormHelperText from '@material-ui/core/FormHelperText'
 import FormControl from '@material-ui/core/FormControl'
 import NativeSelect from '@material-ui/core/NativeSelect'
+
 import configs from '../configs'
 
 class Currency extends React.Component {
@@ -39,21 +40,23 @@ class Currency extends React.Component {
     let { currencyCode, exchangeType, balance } = this.props
     let exchangeAmount = ''
     return (
-      <List component="nav">
-        <FormControl>
-          <NativeSelect
-            value={currencyCode}
-            onChange={this._handleCurrencyChange(exchangeType)}
-            input={<Input name={exchangeType} id={exchangeType} value={configs.currency[currencyCode]}/>}
-          >
-            { Object.keys(configs.currency).map((c) => <option key={configs.currency[c]} value={c}>{configs.currency[c]}</option>)}
-            
-          </NativeSelect>
-          <FormHelperText>Balance: {balance}</FormHelperText>
-          { exchangeAmount ? <span className={`exchange-${exchangeType}`}></span> : null }
-          {/*<Input value={exchangeAmount} onChange={this._handleAmountChange} placeholder="0" type="number"/>*/}
-        </FormControl>
-      </List>
+      <div className="Px-12">
+        <List component="nav">
+          <FormControl>
+            <NativeSelect
+              value={currencyCode}
+              onChange={this._handleCurrencyChange(exchangeType)}
+              input={<Input name={exchangeType} id={exchangeType} value={configs.currency[currencyCode]}/>}
+            >
+              { Object.keys(configs.currency).map((c) => <option key={configs.currency[c]} value={c}>{configs.currency[c]}</option>)}
+              
+            </NativeSelect>
+            <FormHelperText>Balance: {balance}</FormHelperText>
+            { exchangeAmount ? <span className={`exchange-${exchangeType}`}></span> : null }
+            {/*<Input value={exchangeAmount} onChange={this._handleAmountChange} placeholder="0" type="number"/>*/}
+          </FormControl>
+        </List>
+      </div>
     )
   }
 }

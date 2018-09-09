@@ -7,12 +7,12 @@ export default class Header extends React.Component {
 
   render() {
     return (
-      <div>
-        <IconButton>
+      <div className="header">
+        <IconButton className="header-close">
           <CloseIcon />
         </IconButton>
-        <span>Exchange</span>
-        <IconButton>
+        <span className="header-title">Exchange</span>
+        <IconButton className="header-trend">
           <TrendingUpIcon />
         </IconButton>
       </div>

@@ -11,3 +11,63 @@ body {
 .exchange-to:before {
   content: '+';
 }
+
+.rate-eq {
+  padding: 0 4px;
+}
+
+.GBP:before {
+  content: '£';
+}
+
+.USD:before {
+  content: '$';
+}
+
+.EUR:before {
+  content: '€';
+}
+
+.header {
+  text-align: center;
+  overflow: hidden;
+}
+
+.header-title {
+  padding: 15px 0;
+  display: inline-block;
+}
+
+.header-close {
+  float: left;
+}
+
+.header-trend {
+  float: right;
+}
+
+.Px-12 {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.exchange-divider {
+  text-align: center;
+  position: relative;
+  height: 54px;
+}
+
+.exchange-separator {
+  top: 50%;
+  position: relative;
+}
+
+.exchange-swap {
+  position: absolute;
+  left: 0;
+  vertical-align: middle;
+}
+
+.exchange-rate {
+  vertical-align: middle;
+}

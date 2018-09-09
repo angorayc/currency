@@ -1,9 +1,10 @@
 import React from 'react'
-import Divider from '@material-ui/core/Divider'
-import IconButton from '@material-ui/core/IconButton'
+// import IconButton from '@material-ui/core/IconButton'
 import ImportExportIcon from '@material-ui/icons/ImportExport'
 import TrendingUpIcon from '@material-ui/icons/TrendingUp'
 import Button from '@material-ui/core/Button'
+// import Grid from '@material-ui/core/Grid'
+import Divider from '@material-ui/core/Divider'
 
 export default class ExchangeRate extends React.Component {
 
@@ -30,16 +31,26 @@ export default class ExchangeRate extends React.Component {
   }
 
   render() {
+    let { enableExchangeBtn, exchangeRate, currencyFromName, currencyToName } = this.props
     return (
-      <div>
-        <IconButton variant="fab" color="primary" onClick={this._handleSwapBtnClicked}>
-          <ImportExportIcon />
-        </IconButton>
-        <Divider />
-        <Button variant="extendedFab" color="secondary">
-          <TrendingUpIcon />
-          ExchangeRate
-        </Button>
+      <div className="exchange-divider">
+        <Divider className="exchange-separator"/>
+        <span className="exchange-swap Px-12">
+          <Button variant="fab" color="primary" onClick={this._handleSwapBtnClicked}>
+            <ImportExportIcon />
+          </Button>
+        </span>
+        { 
+          exchangeRate ? (
+          <span className="exchange-rate">
+            <Button variant="extendedFab" color="primary" className="rate">
+              <TrendingUpIcon />
+              <span className={currencyFromName}>1</span>
+              <span className="rate-eq">=</span>
+              <span className={currencyToName}>{exchangeRate}</span>
+            </Button>
+          </span>) : null
+        }
       </div>
     )
   }
