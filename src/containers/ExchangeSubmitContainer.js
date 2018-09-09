@@ -1,7 +1,6 @@
 import { connect } from 'react-redux'
 import ExchangeSubmitBtn from '../components/ExchangeSubmitBtn'
 import { handleExchangeSubmit } from '../actions/exchangeActions'
-import { swapCurrency } from '../actions/currencyActions'
 
 const mapStateToProps = state => {
   return {}

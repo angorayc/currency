@@ -22,13 +22,12 @@ const exchangeFrom = function(state = initialFrom, action) {
   let currencyCode = action.currencyCode
   switch (action.type) {
     case actions.SELECT_FROM_CURRENCY:
+
       return Object.assign({}, state, {
         currencyCode: currencyCode,
         currencyName: configs.currency[currencyCode]
       })
     case actions.INPUT_FROM_AMOUNT:
-
-      // exchangeAmount = exchangeAmount ? parseFloat(action.exchangeAmount, 10) : action.exchangeAmount
 
       return Object.assign({}, state, {
         exchangeAmount: exchangeAmount,

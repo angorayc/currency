@@ -3,7 +3,6 @@ import React from 'react'
 import ImportExportIcon from '@material-ui/icons/ImportExport'
 import TrendingUpIcon from '@material-ui/icons/TrendingUp'
 import Button from '@material-ui/core/Button'
-// import Grid from '@material-ui/core/Grid'
 import Divider from '@material-ui/core/Divider'
 
 export default class ExchangeRate extends React.Component {
@@ -31,7 +30,7 @@ export default class ExchangeRate extends React.Component {
   }
 
   render() {
-    let { enableExchangeBtn, exchangeRate, currencyFromName, currencyToName } = this.props
+    let { exchangeRate, currencyFromName, currencyToName } = this.props
     return (
       <div className="exchange-divider">
         <Divider className="exchange-separator"/>

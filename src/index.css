@@ -75,3 +75,7 @@ body {
 .exchange-digit:nth-last-child(1), .exchange-digit:nth-last-child(2) {
   font-size: 12px;
 }
+
+.exchange-amount input{
+  text-align: right;
+}
