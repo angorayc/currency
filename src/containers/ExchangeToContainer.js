@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import Currency from '../components/Currency'
-import { handleToCurrencyChanged, handleToAmountInput } from '../actions/currencyActions'
+import { handleToCurrencyChanged, handleToAmountInput, handleToAmountFocus } from '../actions/currencyActions'
 import { get as _get } from 'lodash'
 
 const mapStateToProps = state => {
@@ -25,6 +25,9 @@ const mapDispatchToProps = dispatch => {
     },
     onAmountChange: (value) => {
       dispatch(handleToAmountInput(value))
+    },
+    onAmountFocus: () => {
+      dispatch(handleToAmountFocus())
     }
   }
 }

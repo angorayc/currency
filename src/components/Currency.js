@@ -15,13 +15,39 @@ class Currency extends React.Component {
     super(props)
     this.state = {
       exchangeAmount: props.exchangeAmount,
-      symbol: props.exchangeType === 'from' ? '-' : '+'
+      symbol: props.exchangeType === 'from' ? '-' : '+',
+      isActive: props.isActive
+    }
+    this.inputRef = React.createRef()
+  }
+
+  componentDidMount() {
+    // console.log(this.props.exchangeType, this.props.isActive)
+    console.log('---didMount---')
+    if (this.props.exchangeType === 'from')
+      this.inputRef.current.focus()
+    
+  }
+
+  componentDidUpdate() {
+    if (this.props.enableAmountInput && this.props.isActive) {
+      this.inputRef.current.focus()
     }
   }
 
   _handleCurrencyChange = name => event => {
     let currencyCode = event.target.value
-    this.props.onCurrencyChange(currencyCode)
+    let { onCurrencyChange } = this.props
+
+    if (typeof onCurrencyChange === 'function')
+      onCurrencyChange(currencyCode)
+  }
+
+  _handleAmountFocus = event => {
+    let { onAmountFocus } = this.props
+
+    if (typeof onAmountFocus === 'function' && this.state.isActive)
+      onAmountFocus()
   }
 
   _handleAmountChange = event => {
@@ -30,8 +56,6 @@ class Currency extends React.Component {
     let matches
 
     if (amount !== '') {
-      
-      
         if(amount === '.')
           amount = `0.`
         else if (amount.match(/^[+-]/))
@@ -56,17 +80,28 @@ class Currency extends React.Component {
         exchangeAmount: nextProps.exchangeAmount
       }
     }
+
+    if (nextProps.isActive !== prevState.isActive) {
+      return {
+        isActive: nextProps.isActive
+      }
+    }
     return null
   }
 
 
   render() {
-    let { currencyCode, exchangeType, balance, enableAmountInput, isActive } = this.props
+    let { currencyCode, exchangeType, balance } = this.props
     let currencyName = configs.currency[currencyCode]
-    let { exchangeAmount, symbol } = this.state
+    let { exchangeAmount, symbol, isActive } = this.state
     let displayAmount = exchangeAmount === '' ? exchangeAmount : `${symbol}${exchangeAmount}`
     let showHint = exchangeAmount > 0 && exchangeAmount < configs.exchange.MIN_EXCHANGE_AMOUNT
     let balanceClassNames = classnames({ 'exchange-hint': exchangeAmount > balance && isActive })
+    console.log(exchangeType, this.inputRef)
+
+    // if (isActive && enableAmountInput)
+    //   this.inputRef.current.focus()
+
     return (
       <div className="Px-12">
         <List component="nav">
@@ -76,7 +111,7 @@ class Currency extends React.Component {
                 <NativeSelect
                   value={currencyCode}
                   onChange={this._handleCurrencyChange(exchangeType)}
-                  input={<Input name={exchangeType} id={exchangeType} value={currencyName}/>}
+                  input={<Input name={exchangeType} id={exchangeType} value={currencyName} disableUnderline={true}/>}
                 >
                   { Object.keys(configs.currency).map((c) => <option key={configs.currency[c]} value={c}>{configs.currency[c]}</option>)}
                   
@@ -88,12 +123,14 @@ class Currency extends React.Component {
             </Grid>
             <Grid item xs={9}>
               <Input className="exchange-amount"
-                fullWidth={true}
-                autoFocus={isActive}
-                placeholder="0"
-                value={displayAmount}
-                onChange={this._handleAmountChange}
-                disabled={!enableAmountInput} />
+                  disableUnderline={true}
+                  fullWidth={true}
+                  autoFocus={isActive}
+                  placeholder="0"
+                  value={displayAmount}
+                  onFocus={this._handleAmountFocus}
+                  onChange={this._handleAmountChange}
+                  inputRef={this.inputRef} />
               { showHint && isActive ? <FormHelperText className="exchange-hint">
                   Minimun amount is <span className={currencyName}>{configs.exchange.MIN_EXCHANGE_AMOUNT}</span>
                   </FormHelperText> : null }

@@ -61,6 +61,10 @@ const isExchangeFromFocused = function(state = true, action) {
   switch (action.type) {
     case actions.SWAP_CURRENCY:
       return !state
+    case actions.FOCUS_FROM_AMOUNT:
+      return true
+    case actions.FOCUS_TO_AMOUNT:
+      return false
     default:
       return state
   }
