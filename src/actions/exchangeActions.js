@@ -88,7 +88,7 @@ export const getRateTimerStart = () => {
     
     return Promise.resolve(dispatch({ type: START_RATE_TIMER }))
       .then(() => { dispatch(getRate()) })
-      .then(() => { timer = setInterval(() => { dispatch(getRate()) }, 1000 * configs.exchange.UPDATE_RATE_FREQUENCY) })
+      .then(() => { timer = setInterval(() => { dispatch(getRate()) }, 1000 * 60 * 60) })
   }
 }
 

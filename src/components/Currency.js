@@ -22,8 +22,6 @@ class Currency extends React.Component {
   }
 
   componentDidMount() {
-    // console.log(this.props.exchangeType, this.props.isActive)
-    console.log('---didMount---')
     if (this.props.exchangeType === 'from')
       this.inputRef.current.focus()
     
@@ -96,11 +94,9 @@ class Currency extends React.Component {
     let { exchangeAmount, symbol, isActive } = this.state
     let displayAmount = exchangeAmount === '' ? exchangeAmount : `${symbol}${exchangeAmount}`
     let showHint = exchangeAmount > 0 && exchangeAmount < configs.exchange.MIN_EXCHANGE_AMOUNT
-    let balanceClassNames = classnames({ 'exchange-hint': exchangeAmount > balance && isActive })
-    console.log(exchangeType, this.inputRef)
+    let balanceClassNames = classnames({ 'exchange-hint': exchangeAmount > balance 
+      && (exchangeType === 'from') })
 
-    // if (isActive && enableAmountInput)
-    //   this.inputRef.current.focus()
 
     return (
       <div className="Px-12">
