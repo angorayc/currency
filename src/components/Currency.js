@@ -8,6 +8,8 @@ import NativeSelect from '@material-ui/core/NativeSelect'
 import Grid from '@material-ui/core/Grid'
 import configs from '../configs'
 import classnames from 'classnames'
+import IconButton from '@material-ui/core/IconButton'
+import InfoIcon from '@material-ui/icons/InfoOutlined'
 
 class Currency extends React.Component {
 
@@ -96,7 +98,7 @@ class Currency extends React.Component {
     let showHint = exchangeAmount > 0 && exchangeAmount < configs.exchange.MIN_EXCHANGE_AMOUNT
     let balanceClassNames = classnames({ 'exchange-hint': exchangeAmount > balance 
       && (exchangeType === 'from') })
-
+    let showFee = !isActive && fee
 
     return (
       <div className="Px-12">
@@ -129,6 +131,12 @@ class Currency extends React.Component {
                   inputRef={this.inputRef} />
               { showHint && isActive ? <FormHelperText className="exchange-hint">
                   Minimun amount is <span className={currencyName}>{configs.exchange.MIN_EXCHANGE_AMOUNT}</span>
+                  </FormHelperText> : null }
+              { showFee ? <FormHelperText>
+                  Inc. fee <span className={currencyName}>{fee}</span>
+                  <IconButton>
+                    <InfoIcon />
+                  </IconButton>
                   </FormHelperText> : null }
             </Grid>
           </Grid>
