@@ -1,7 +1,9 @@
 import configs from '../configs'
-import { get as _get } from 'lodash'
-import { caculateSourceAmount, caculateTargetAmount,
-  updateSourceAmount, updateTargetAmount } from './currencyActions'
+import { caculateSourceAmount,
+  caculateTargetAmount,
+  updateSourceAmount,
+  updateTargetAmount
+} from './currencyActions'
 export const GET_RATE_START = 'GET_RATE_START'
 export const GET_RATE_SUCCESS = 'GET_RATE_SUCCESS'
 export const GET_RATE_FAILURE = 'GET_RATE_FAILURE'
@@ -37,49 +39,27 @@ export const getRate = () => {
     dispatch(getRateStart())
     let storeState = getState()
     let base = storeState.currency.exchangeFrom.currencyName
-    let baseCode = parseInt(storeState.currency.exchangeFrom.currencyCode, 10)
     let symbols = Object.keys(configs.currency).reduce((acc, currCode) => {
-    let currName = configs.currency[currCode]
-
-      return (parseInt(currCode, 10) !== baseCode && acc.indexOf(currName) < 0) ? acc.concat([currName]) : acc
-    }, []).join(',')
-    console.log(`fetching http://data.fixer.io/api/latest?base=${base}&symbols=${symbols}`)
+      let currName = configs.currency[currCode]
+      return acc +=  currCode > 0 ? `,${currName}` : currName
+    }, '')
 
     return fetch(`https://data.fixer.io/api/latest?access_key=4f010a2fe1a7f83edcc3d777077950aa&base=${base}&symbols=${symbols}`)
-      .then(
-        response => response.json(),
-        error => dispatch(getRateFailure())
-      )
-      .then(data => { dispatch(getRateSuccess(data)) })
+      .then((resp) => resp.json(), error => dispatch(getRateFailure()))
+      .then((data) => {
+        dispatch(getRateSuccess(data))
+      })
       .then(() => {
         let lastestStoreState = getState()
-        let exchangeAmount
-        let targetAmount
         if (lastestStoreState.currency.isExchangeFromFocused) {
-          exchangeAmount = _get(lastestStoreState.currency, 'exchangeFrom.exchangeAmount')
-          targetAmount = caculateTargetAmount(lastestStoreState, exchangeAmount)
-          dispatch(updateTargetAmount(targetAmount))
+          return caculateTargetAmount(lastestStoreState)
+            .then((expectAmount) => dispatch(updateTargetAmount(expectAmount)))
+          
         } else {
-          exchangeAmount = _get(lastestStoreState.currency, 'exchangeTo.exchangeAmount')
-          targetAmount = caculateSourceAmount(lastestStoreState, exchangeAmount)
-          dispatch(updateSourceAmount(targetAmount))
+          return caculateSourceAmount(lastestStoreState)
+            .then((expectAmount) => dispatch(updateSourceAmount(expectAmount)))
         }
       })
-    // return Promise.resolve({
-    //   "success": true,
-    //   "timestamp": 1536479948,
-    //   "base": base,
-    //   "date": "2018-09-09",
-    //   "rates": {
-    //       "GBP": 0.895555,
-    //       "USD": 1.157152,
-    //       "EUR": 1.222222
-    //   }
-    // }).then((data) => {
-    //   dispatch(getRateSuccess(data))
-    // }).catch(() => {
-    //   dispatch(getRateFailure())
-    // })
   }
 }
 

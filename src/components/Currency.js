@@ -91,7 +91,7 @@ class Currency extends React.Component {
 
 
   render() {
-    let { currencyCode, exchangeType, balance } = this.props
+    let { currencyCode, exchangeType, balance, fee } = this.props
     let currencyName = configs.currency[currencyCode]
     let { exchangeAmount, symbol, isActive } = this.state
     let displayAmount = exchangeAmount === '' ? exchangeAmount : `${symbol}${exchangeAmount}`
