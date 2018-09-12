@@ -11,7 +11,8 @@ import classnames from 'classnames'
 import IconButton from '@material-ui/core/IconButton'
 import InfoIcon from '@material-ui/icons/InfoOutlined'
 import { withStyles } from '@material-ui/core/styles'
-import { validateInput, extractValue } from '../helper'
+import { validateInput, extractValue, validateInputLength } from '../helper'
+import numeral from 'numeral'
 
 const styles = () => ({
   exchangeFromContainer: {
@@ -25,12 +26,32 @@ const styles = () => ({
     paddingRight: '8px',
     boxSizing: 'border-box'
   },
+  exchangeInput: {
+    width: '100%',
+    textAlign: 'right'
+  },
   exchangeAmount: {
+    textAlign: 'right'
+  },
+  feeHint: {
     textAlign: 'right'
   },
   exchangeHint: {
     color: configs.colors.pink,
     textAlign: 'right'
+  },
+  infoIcon: {
+    verticalAlign: 'middle',
+    width: '12px',
+    height: '12px',
+    paddingLeft: '10px'
+  },
+  infoIconBtn: {
+    height: 'auto',
+    width: 'auto'
+  },
+  currency: {
+    verticalAlign: 'middle'
   }
 })
 
@@ -77,7 +98,8 @@ class Currency extends React.Component {
     let { onAmountChange } = this.props
     let amount = extractValue(event.target.value)
     let matches = amount.match(/^(\.)(\d{0,2})/)
-    if (!validateInput(amount))
+
+    if (!validateInput(amount) || !validateInputLength(amount))
       return
 
     
@@ -146,6 +168,7 @@ class Currency extends React.Component {
               </FormControl>
             </Grid>
             <Grid item xs={9}>
+              <FormControl className={classes.exchangeInput}>
               <Input className="exchange-amount"
                   disableUnderline={true}
                   fullWidth={true}
@@ -156,14 +179,13 @@ class Currency extends React.Component {
                   onChange={this._handleAmountChange}
                   inputRef={this.inputRef} />
               { showHint && isActive ? <FormHelperText className={classes.exchangeHint}>
-                  Minimun amount is <span className={currencyName}>{configs.exchange.MIN_EXCHANGE_AMOUNT}</span>
+                  Minimun amount is <span className={currencyName}>{numeral(configs.exchange.MIN_EXCHANGE_AMOUNT).format('0.00')}</span>
                   </FormHelperText> : null }
-              { showFee ? <FormHelperText>
-                  Inc. fee <span className={currencyName}>{fee}</span>
-                  <IconButton>
-                    <InfoIcon />
-                  </IconButton>
+              { showFee ? <FormHelperText className={classes.feeHint}>
+                  Inc. fee <span className={classnames(currencyName, classes.currency)}>{fee}</span>
+                  <IconButton className={classes.infoIconBtn}><InfoIcon className={classes.infoIcon} /></IconButton>
                   </FormHelperText> : null }
+              </FormControl>
             </Grid>
           </Grid>
         </List>

@@ -1,4 +1,4 @@
-import { getRateTimerRestart } from './exchangeActions'
+import { getRateTimerRestart, getFeeRate } from './exchangeActions'
 import configs from '../configs'
 import { get as _get } from 'lodash'
 import numeral from 'numeral'
@@ -47,6 +47,7 @@ export const swapCurrency = () => {
           return dispatch(updateSourceAmount(baseAmount))
       })
       .then(() => dispatch({ type: SWAP_CURRENCY }))
+      .then(() => dispatch(getFeeRate()))
 
   }
 }
@@ -124,7 +125,7 @@ export const caculateTargetAmount = () => {
         resolve(rates)
     })
     .then((rates) => { 
-      return fx.rates = rates
+      fx.rates = Object.assign({}, rates)
     })
     .then(() => {
       return fx(exchangeAmount).from(fromCurrency).to(toCurrency)
@@ -152,7 +153,7 @@ export const caculateSourceAmount = () => {
         resolve(rates)
     })
     .then((rates) => { 
-      return fx.rates = rates
+      return fx.rates = Object.assign({}, rates)
     })
     .then(() => {
       return fx(exchangeAmount).from(toCurrency).to(fromCurrency)
@@ -182,6 +183,7 @@ export const handleFromAmountInput = (exchangeAmount) => {
         }, 1000 * 0.5)
       }
     })
+    .then(() => dispatch(getFeeRate()))
     .then(() => dispatch(caculateTargetAmount()))
 
   }
@@ -200,6 +202,7 @@ export const handleToAmountInput = (exchangeAmount) => {
         }, 1000 * 0.5)
       }
     })
+    .then(() => dispatch(getFeeRate()))
     .then(() => dispatch(caculateSourceAmount()))
   }
 }

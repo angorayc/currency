@@ -1,21 +1,24 @@
 import { combineReducers } from 'redux'
 import * as actions from '../actions/currencyActions'
+import { SHOW_TO_FEE, SHOW_FROM_FEE } from '../actions/exchangeActions'
 import configs from '../configs'
-const defaultExchangeFrom = 0
+const defaultExchangeFrom = configs.exchange.EXCHANGE_BASE_CODE
 const defaultExchangeTo = 1
 const initialFrom = {
   currencyCode: defaultExchangeFrom,
   exchangeType: 'from',
   currencyName: configs.currency[defaultExchangeFrom],
   exchangeAmount: '',
-  balance: 0
+  balance: 0,
+  fee: ''
 }
 const initialTo = {
   currencyCode: defaultExchangeTo,
   exchangeType: 'to',
   currencyName: configs.currency[defaultExchangeTo],
   exchangeAmount: '',
-  balance: 0
+  balance: 0,
+  fee: ''
 }
 const exchangeFrom = function(state = initialFrom, action) {
   let exchangeAmount = action.exchangeAmount ? parseFloat(action.exchangeAmount, 10) : action.exchangeAmount
@@ -32,6 +35,14 @@ const exchangeFrom = function(state = initialFrom, action) {
       return Object.assign({}, state, {
         exchangeAmount: exchangeAmount,
         balance: 0
+      })
+    case SHOW_FROM_FEE:
+      return Object.assign({}, state, {
+        fee: action.fee
+      })
+    case actions.SWAP_CURRENCY:
+      return Object.assign({}, state, {
+        fee: ''
       })
     default:
       return state
@@ -51,6 +62,14 @@ const exchangeTo = function(state = initialTo, action) {
       return Object.assign({}, state, {
         exchangeAmount: exchangeAmount,
         balance: 0
+      })
+    case SHOW_TO_FEE:
+      return Object.assign({}, state, {
+        fee: action.fee
+      })
+    case actions.SWAP_CURRENCY:
+      return Object.assign({}, state, {
+        fee: ''
       })
     default:
       return state

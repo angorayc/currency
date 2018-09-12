@@ -14,7 +14,8 @@ const mapStateToProps = state => {
     exchangeAmount: exchangeFrom.exchangeAmount,
     balance: exchangeFrom.balance,
     enableAmountInput: exchangeBase === exchangeFrom.currencyName,
-    isActive: state.currency.isExchangeFromFocused
+    isActive: state.currency.isExchangeFromFocused,
+    fee: exchangeFrom.fee
   }
 }
 

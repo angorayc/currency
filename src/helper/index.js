@@ -1,17 +1,19 @@
+import configs from '../configs'
+
 export const checkStartsWithPlusOrMinus = value => {
-  const stringifiedValue = typeof value !== 'string' ? value.toString() : value;
-  const firstSymbol = stringifiedValue.charAt(0);
-  return firstSymbol === '+' || firstSymbol === '-';
+  const stringifiedValue = typeof value !== 'string' ? value.toString() : value
+  const firstSymbol = stringifiedValue.charAt(0)
+  return firstSymbol === '+' || firstSymbol === '-'
 }
 
 export const extractValue = value => {
-  const stringifiedValue = value.toString();
+  const stringifiedValue = value.toString()
   if (checkStartsWithPlusOrMinus(value)) {
     return stringifiedValue.length > 1
       ? stringifiedValue.substring(1, value.length)
-      : '';
+      : ''
   } else {
-    return stringifiedValue;
+    return stringifiedValue
   }
 }
 
@@ -21,5 +23,11 @@ export const validateInput = value => {
     /^[0-9]+$/.test(value) ||
     /^[0-9]*[.]$/.test(value) ||
     /^[0-9]*[.][0-9]{1,2}$/.test(value)
-  );
-};
+  )
+}
+
+export const validateInputLength = value => {
+  return value.toString().length <= configs.exchange.MAX_AMOUNT_LENGTH
+}
+
+
