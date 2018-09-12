@@ -120,19 +120,22 @@ export const caculateTargetAmount = () => {
     let rates = _get(storeState.exchange, 'data.rates')
     let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
     let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
+    // let toCurrencyFee = _get(storeState.currency, 'exchangeTo.fee')
+
     return new Promise((resolve) => {
-      if (rates && exchangeAmount !== '')
+      if (rates)
         resolve(rates)
     })
     .then((rates) => { 
       fx.rates = Object.assign({}, rates)
     })
     .then(() => {
-      return fx(exchangeAmount).from(fromCurrency).to(toCurrency)
+      return exchangeAmount ? fx(exchangeAmount).from(fromCurrency).to(toCurrency) : exchangeAmount
     })
     .then((expectAmount) => {
-      if(expectAmount) 
-        return dispatch(updateTargetAmount(numeral(expectAmount).format('0.00')))
+      let numeralAmount = numeral(expectAmount)
+      let updateValue = numeralAmount.value() ? numeralAmount.format('0.00') : expectAmount
+      return dispatch(updateTargetAmount(updateValue))
     })
     .catch((e) => {
       return ''
@@ -148,19 +151,21 @@ export const caculateSourceAmount = () => {
     let rates = _get(storeState.exchange, 'data.rates')
     let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
     let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
+    // let fromCurrencyFee = _get(storeState.currency, 'exchangeFrom.fee')
     return new Promise((resolve) => {
-      if (rates && exchangeAmount !== '')
+      if (rates)
         resolve(rates)
     })
     .then((rates) => { 
       return fx.rates = Object.assign({}, rates)
     })
     .then(() => {
-      return fx(exchangeAmount).from(toCurrency).to(fromCurrency)
+      return exchangeAmount ? fx(exchangeAmount).from(toCurrency).to(fromCurrency) : exchangeAmount
     })
     .then((expectAmount) => {
-      if(expectAmount) 
-        return dispatch(updateSourceAmount(numeral(expectAmount).format('0.00')))
+      let numeralAmount = numeral(expectAmount)
+      let updateValue = numeralAmount.value() ? numeralAmount.format('0.00') : expectAmount
+      return dispatch(updateSourceAmount(updateValue))        
     })
     .catch((e) => {
       return ''

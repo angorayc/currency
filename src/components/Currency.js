@@ -13,7 +13,9 @@ import InfoIcon from '@material-ui/icons/InfoOutlined'
 import { withStyles } from '@material-ui/core/styles'
 import { validateInput, extractValue, validateInputLength } from '../helper'
 import numeral from 'numeral'
+import ExchangeDialog from './ExchangeDialog'
 
+const options = ['View upgrade options', 'Got it']
 const styles = () => ({
   exchangeFromContainer: {
     background: 'white'
@@ -33,12 +35,14 @@ const styles = () => ({
   exchangeAmount: {
     textAlign: 'right'
   },
+  balanceHint: {
+    textAlign: 'left'
+  },
   feeHint: {
     textAlign: 'right'
   },
   exchangeHint: {
-    color: configs.colors.pink,
-    textAlign: 'right'
+    color: configs.colors.pink
   },
   infoIcon: {
     verticalAlign: 'middle',
@@ -62,7 +66,9 @@ class Currency extends React.Component {
     this.state = {
       exchangeAmount: props.exchangeAmount,
       symbol: props.exchangeType === 'from' ? '-' : '+',
-      isActive: props.isActive
+      isActive: props.isActive,
+      open: false,
+      selectedValue: options[1],
     }
     this.inputRef = React.createRef()
   }
@@ -90,7 +96,7 @@ class Currency extends React.Component {
   _handleAmountFocus = event => {
     let { onAmountFocus } = this.props
 
-    if (typeof onAmountFocus === 'function' && this.state.isActive)
+    if (typeof onAmountFocus === 'function')
       onAmountFocus()
   }
 
@@ -116,6 +122,16 @@ class Currency extends React.Component {
     this.setState({ exchangeAmount: amount })
   }
 
+  _handleClickOpen = () => {
+    this.setState({
+      open: true,
+    })
+  }
+
+  _handleClose = value => {
+    this.setState({ selectedValue: value, open: false })
+  }
+
   static getDerivedStateFromProps(nextProps, prevState) {
     if (parseFloat(nextProps.exchangeAmount, 10) !== parseFloat(prevState.exchangeAmount, 10)) {
       return {
@@ -137,10 +153,11 @@ class Currency extends React.Component {
     let currencyName = configs.currency[currencyCode]
     let { exchangeAmount, symbol, isActive } = this.state
     let displayAmount = exchangeAmount === '' ? exchangeAmount : `${symbol}${exchangeAmount}`
-    let showHint = exchangeAmount > 0 && exchangeAmount < configs.exchange.MIN_EXCHANGE_AMOUNT
+    let showMinAmountHint = exchangeAmount > 0 && exchangeAmount < configs.exchange.MIN_EXCHANGE_AMOUNT
     let isFrom = exchangeType === 'from'
     let balanceClassNames = classnames({
-        [classes.exchangeHint]: exchangeAmount > balance && isFrom
+        [classes.exchangeHint]: exchangeAmount > balance && isFrom,
+        [classes.balanceHint]: true
       })
     let showFee = !isActive && fee
     let rootClasses = classnames({
@@ -148,6 +165,9 @@ class Currency extends React.Component {
       [classes.exchangeFromContainer]: isFrom,
       [classes.exchangeToContainer]: !isFrom
     })
+    let minAmount = showMinAmountHint ? numeral(configs.exchange.MIN_EXCHANGE_AMOUNT).format('0.00') : ''
+    let displayFee = showFee? numeral(fee).format('0,0.00') : ''
+
     return (
       <div className={rootClasses}>
         <List component="nav">
@@ -178,13 +198,18 @@ class Currency extends React.Component {
                   onFocus={this._handleAmountFocus}
                   onChange={this._handleAmountChange}
                   inputRef={this.inputRef} />
-              { showHint && isActive ? <FormHelperText className={classes.exchangeHint}>
-                  Minimun amount is <span className={currencyName}>{numeral(configs.exchange.MIN_EXCHANGE_AMOUNT).format('0.00')}</span>
+              { showMinAmountHint && isActive ? <FormHelperText className={classes.exchangeHint}>
+                  Minimun amount is <span className={currencyName}>{minAmount}</span>
                   </FormHelperText> : null }
               { showFee ? <FormHelperText className={classes.feeHint}>
-                  Inc. fee <span className={classnames(currencyName, classes.currency)}>{fee}</span>
-                  <IconButton className={classes.infoIconBtn}><InfoIcon className={classes.infoIcon} /></IconButton>
+                  Inc. fee <span className={classnames(currencyName, classes.currency)}>{displayFee}</span>
+                  <IconButton className={classes.infoIconBtn} onClick={this._handleClickOpen}><InfoIcon className={classes.infoIcon} /></IconButton>
                   </FormHelperText> : null }
+                  <ExchangeDialog
+                    selectedValue={this.state.selectedValue}
+                    open={this.state.open}
+                    onClose={this._handleClose}
+                  />
               </FormControl>
             </Grid>
           </Grid>
