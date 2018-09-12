@@ -40,7 +40,7 @@ export const getRate = () => {
       return acc +=  currCode > 0 ? `,${currName}` : currName
     }, '')
 
-    return fetch(`https://data.fixer.io/api/latest?access_key=4f010a2fe1a7f83edcc3d777077950aa&base=${base}&symbols=${symbols}`)
+    return fetch(`${configs.exchange.API_HOST}${configs.exchange.GET_LATEST_RATE}?access_key=${configs.exchange.APP_ID}&base=${base}&symbols=${symbols}`)
       .then((resp) => resp.json(), error => dispatch(getRateFailure(error.message)))
       .then((data) => dispatch(getRateSuccess(data)))
       .then(() => {
@@ -59,7 +59,7 @@ export const getRateTimerStart = () => {
     
     return Promise.resolve(dispatch({ type: START_RATE_TIMER }))
       .then(() => { dispatch(getRate()) })
-      .then(() => { timer = setInterval(() => { dispatch(getRate()) }, 1000 * 10) })
+      .then(() => { timer = setInterval(() => { dispatch(getRate()) }, 1000 * 10000) })
   }
 }
 

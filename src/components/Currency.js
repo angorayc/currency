@@ -11,7 +11,7 @@ import classnames from 'classnames'
 import IconButton from '@material-ui/core/IconButton'
 import InfoIcon from '@material-ui/icons/InfoOutlined'
 import { withStyles } from '@material-ui/core/styles'
-import { validateInput } from '../helper'
+import { validateInput, extractValue } from '../helper'
 
 const styles = () => ({
   exchangeFromContainer: {
@@ -75,16 +75,15 @@ class Currency extends React.Component {
 
   _handleAmountChange = event => {
     let { onAmountChange } = this.props
-    let amount = event.target.value
+    let amount = extractValue(event.target.value)
+    let matches = amount.match(/^(\.)(\d{0,2})/)
+    if (!validateInput(amount))
+      return
 
+    
     if (amount !== '') {
-        if(amount === '.')
-          amount = `0.`
-        else if (amount.match(/^[+-]/))
-          amount = amount.slice(1)
-
-        if (!validateInput(amount))
-          amount = amount.slice(0, -1)
+      if(matches)
+        amount = `0${matches[1]}${matches[2]}`
 
       if (amount.match(/^0\d{1,}/)) {
         amount = amount.slice(1)
