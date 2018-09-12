@@ -42,9 +42,9 @@ export const swapCurrency = () => {
       .then(() => dispatch(handleToCurrencyChanged(exchangeFrom)))
       .then(() => {
         if (storeState.currency.isExchangeFromFocused)
-          dispatch(updateTargetAmount(baseAmount))
+          return dispatch(updateTargetAmount(baseAmount))
         else
-          dispatch(updateSourceAmount(baseAmount))
+          return dispatch(updateSourceAmount(baseAmount))
       })
       .then(() => dispatch({ type: SWAP_CURRENCY }))
 
@@ -73,8 +73,8 @@ export const handleToCurrencyChanged = (currencyCode) => {
   return (dispatch, getState) => {
 
     let storeState = getState()
-    let exchangeFrom = storeState.currency.exchangeFrom.currencyCode
-    let exchangeTo = storeState.currency.exchangeTo.currencyCode
+    let exchangeFrom = _get(storeState.currency, 'exchangeFrom.currencyCode')
+    let exchangeTo = _get(storeState.currency, 'exchangeTo.currencyCode')
 
     return Promise.resolve(dispatch(currencyToSwitched(currencyCode)))
       .then(() => {
@@ -112,56 +112,59 @@ const getTargetRate = (storeState) => {
   return targetRate
 }
 
-export const caculateTargetAmount = (storeState) => {
-  let exchangeAmount = _get(storeState.currency, 'exchangeFrom.exchangeAmount')
-  let rates = _get(storeState.exchange, 'data.rates')
-  let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
-  let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
-  return new Promise((resolve) => {
-    if (rates && exchangeAmount !== '')
-      resolve(rates)
-  })
-  .then((rates) => { 
-    return fx.rates = rates
-  })
-  .then(() => {
-    return numeral(fx(exchangeAmount).from(fromCurrency).to(toCurrency)).format('0.00')
-  })
-  .catch((e) => {
-    return ''
-  })
+export const caculateTargetAmount = () => {
+  return (dispatch, getState) => {
+    let storeState = getState()
+    let exchangeAmount = _get(storeState.currency, 'exchangeFrom.exchangeAmount')
+    let rates = _get(storeState.exchange, 'data.rates')
+    let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
+    let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
+    return new Promise((resolve) => {
+      if (rates && exchangeAmount !== '')
+        resolve(rates)
+    })
+    .then((rates) => { 
+      return fx.rates = rates
+    })
+    .then(() => {
+      return fx(exchangeAmount).from(fromCurrency).to(toCurrency)
+    })
+    .then((expectAmount) => {
+      if(expectAmount) 
+        return dispatch(updateTargetAmount(numeral(expectAmount).format('0.00')))
+    })
+    .catch((e) => {
+      return ''
+    })
+  }
 }
 
 
-
-// export const caculateSourceAmount = (storeState, exchangeAmount) => {
-  
-//   let targetRate = getTargetRate(storeState)
-//   let expectAmount = targetRate ? ((exchangeAmount || 0) / targetRate) : ''
-//   expectAmount = parseFloat(expectAmount, 10) > 0 ? numeral(expectAmount).format('0.00') : '' 
-
-//   return expectAmount
-// }
-
-export const caculateSourceAmount = (storeState) => {
-  
-  let exchangeAmount = _get(storeState.currency, 'exchangeTo.exchangeAmount')
-  let rates = _get(storeState.exchange, 'data.rates')
-  let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
-  let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
-  return new Promise((resolve) => {
-    if (rates && exchangeAmount !== '')
-      resolve(rates)
-  })
-  .then((rates) => { 
-    return fx.rates = rates
-  })
-  .then(() => {
-    return numeral(fx(exchangeAmount).from(toCurrency).to(fromCurrency)).format('0.00')
-  })
-  .catch((e) => {
-    return ''
-  })
+export const caculateSourceAmount = () => {
+  return (dispatch, getState) => {
+    let storeState = getState()
+    let exchangeAmount = _get(storeState.currency, 'exchangeTo.exchangeAmount')
+    let rates = _get(storeState.exchange, 'data.rates')
+    let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
+    let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
+    return new Promise((resolve) => {
+      if (rates && exchangeAmount !== '')
+        resolve(rates)
+    })
+    .then((rates) => { 
+      return fx.rates = rates
+    })
+    .then(() => {
+      return fx(exchangeAmount).from(toCurrency).to(fromCurrency)
+    })
+    .then((expectAmount) => {
+      if(expectAmount) 
+        return dispatch(updateSourceAmount(numeral(expectAmount).format('0.00')))
+    })
+    .catch((e) => {
+      return ''
+    })
+  }
 }
 
 
@@ -179,10 +182,7 @@ export const handleFromAmountInput = (exchangeAmount) => {
         }, 1000 * 0.5)
       }
     })
-    .then(() => {
-      return caculateTargetAmount(getState())
-        .then((expectAmount) => dispatch(updateTargetAmount(expectAmount)))
-    })
+    .then(() => dispatch(caculateTargetAmount()))
 
   }
 }
@@ -200,10 +200,7 @@ export const handleToAmountInput = (exchangeAmount) => {
         }, 1000 * 0.5)
       }
     })
-    .then(() => {
-      return caculateSourceAmount(getState())
-        .then((expectAmount) => dispatch(updateSourceAmount(expectAmount)))
-    })
+    .then(() => dispatch(caculateSourceAmount()))
   }
 }
 

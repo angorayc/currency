@@ -10,6 +10,29 @@ import configs from '../configs'
 import classnames from 'classnames'
 import IconButton from '@material-ui/core/IconButton'
 import InfoIcon from '@material-ui/icons/InfoOutlined'
+import { withStyles } from '@material-ui/core/styles'
+import { validateInput } from '../helper'
+
+const styles = () => ({
+  exchangeFromContainer: {
+    background: 'white'
+  },
+  exchangeToContainer: {
+    background: configs.colors.gray1
+  },
+  exchangeSelect: {
+    width: '100%',
+    paddingRight: '8px',
+    boxSizing: 'border-box'
+  },
+  exchangeAmount: {
+    textAlign: 'right'
+  },
+  exchangeHint: {
+    color: configs.colors.pink,
+    textAlign: 'right'
+  }
+})
 
 class Currency extends React.Component {
 
@@ -53,16 +76,14 @@ class Currency extends React.Component {
   _handleAmountChange = event => {
     let { onAmountChange } = this.props
     let amount = event.target.value
-    let matches
 
     if (amount !== '') {
         if(amount === '.')
           amount = `0.`
         else if (amount.match(/^[+-]/))
           amount = amount.slice(1)
-        
-        matches = (amount.match(/\D/g) || []).filter((m) => m !== '.')
-        if(matches.length)
+
+        if (!validateInput(amount))
           amount = amount.slice(0, -1)
 
       if (amount.match(/^0\d{1,}/)) {
@@ -91,21 +112,27 @@ class Currency extends React.Component {
 
 
   render() {
-    let { currencyCode, exchangeType, balance, fee } = this.props
+    let { currencyCode, exchangeType, balance, fee, classes } = this.props
     let currencyName = configs.currency[currencyCode]
     let { exchangeAmount, symbol, isActive } = this.state
     let displayAmount = exchangeAmount === '' ? exchangeAmount : `${symbol}${exchangeAmount}`
     let showHint = exchangeAmount > 0 && exchangeAmount < configs.exchange.MIN_EXCHANGE_AMOUNT
-    let balanceClassNames = classnames({ 'exchange-hint': exchangeAmount > balance 
-      && (exchangeType === 'from') })
+    let isFrom = exchangeType === 'from'
+    let balanceClassNames = classnames({
+        [classes.exchangeHint]: exchangeAmount > balance && isFrom
+      })
     let showFee = !isActive && fee
-
+    let rootClasses = classnames({
+      'Px-12': true,
+      [classes.exchangeFromContainer]: isFrom,
+      [classes.exchangeToContainer]: !isFrom
+    })
     return (
-      <div className="Px-12">
+      <div className={rootClasses}>
         <List component="nav">
           <Grid container>
             <Grid item xs={3}>
-              <FormControl className="exchange-select">
+              <FormControl className={classes.exchangeSelect}>
                 <NativeSelect
                   value={currencyCode}
                   onChange={this._handleCurrencyChange(exchangeType)}
@@ -129,7 +156,7 @@ class Currency extends React.Component {
                   onFocus={this._handleAmountFocus}
                   onChange={this._handleAmountChange}
                   inputRef={this.inputRef} />
-              { showHint && isActive ? <FormHelperText className="exchange-hint">
+              { showHint && isActive ? <FormHelperText className={classes.exchangeHint}>
                   Minimun amount is <span className={currencyName}>{configs.exchange.MIN_EXCHANGE_AMOUNT}</span>
                   </FormHelperText> : null }
               { showFee ? <FormHelperText>
@@ -155,4 +182,4 @@ Currency.propTypes = {
   balance:PropTypes.number
 }
 
-export default Currency
+export default withStyles(styles)(Currency)

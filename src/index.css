@@ -29,38 +29,9 @@ body {
   content: '€';
 }
 
-
-
 .Px-12 {
   padding-left: 12px;
   padding-right: 12px;
-}
-
-.exchange-divider {
-  text-align: center;
-  position: relative;
-  height: 54px;
-}
-
-.exchange-separator {
-  top: 50%;
-  position: relative;
-}
-
-.exchange-select {
-  width: 100%;
-  padding-right: 8px !important;
-  box-sizing: border-box;
-}
-
-.exchange-swap {
-  position: absolute;
-  left: 0;
-  vertical-align: middle;
-}
-
-.exchange-rate {
-  vertical-align: middle;
 }
 
 .exchange-digit:nth-last-child(1), .exchange-digit:nth-last-child(2) {
@@ -69,9 +40,4 @@ body {
 
 .exchange-amount input{
   text-align: right;
-}
-
-.exchange-hint {
-  color: red !important;
-  text-align: right !important;
 }

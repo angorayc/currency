@@ -10,6 +10,7 @@ const styles = theme => ({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
+    backgroundColor: 'white'
   },
   iconTrending: {
     borderRadius: '50%',

@@ -1,13 +1,31 @@
 import React from 'react'
 import Button from '@material-ui/core/Button'
 import TrendingUpIcon from '@material-ui/icons/TrendingUp'
+import { withStyles } from '@material-ui/core/styles'
+import configs from '../configs'
 
-export default class ExchangeSubmitBtn extends React.Component {
+const styles = theme => ({
+  submitContainer: {
+    textAlign: 'center'
+  },
+  submitBtn: {
+    background: configs.colors.pink,
+    color: 'white',
+    boxShadow: 'none',
+    '&:disabled': {
+      background: configs.colors.pink,
+      opacity: 0.2,
+      color: 'white'
+    }
+  } 
+})
+
+class ExchangeSubmitBtn extends React.Component {
   render() {
-    let { enableExchangeBtn } = this.props
+    let { enableExchangeBtn, classes } = this.props
     return (
-      <div className="exchange-divider">
-        <Button variant="extendedFab" color="secondary" className="rate" disabled={!enableExchangeBtn}>
+      <div className={classes.submitContainer}>
+        <Button variant="extendedFab" className={classes.submitBtn} disabled={!enableExchangeBtn}>
           <TrendingUpIcon />
           Exchange
         </Button>
@@ -15,3 +33,5 @@ export default class ExchangeSubmitBtn extends React.Component {
     )
   }
 }
+
+export default withStyles(styles)(ExchangeSubmitBtn)

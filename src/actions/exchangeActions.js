@@ -1,9 +1,5 @@
 import configs from '../configs'
-import { caculateSourceAmount,
-  caculateTargetAmount,
-  updateSourceAmount,
-  updateTargetAmount
-} from './currencyActions'
+import { caculateSourceAmount, caculateTargetAmount } from './currencyActions'
 export const GET_RATE_START = 'GET_RATE_START'
 export const GET_RATE_SUCCESS = 'GET_RATE_SUCCESS'
 export const GET_RATE_FAILURE = 'GET_RATE_FAILURE'
@@ -45,19 +41,14 @@ export const getRate = () => {
     }, '')
 
     return fetch(`https://data.fixer.io/api/latest?access_key=4f010a2fe1a7f83edcc3d777077950aa&base=${base}&symbols=${symbols}`)
-      .then((resp) => resp.json(), error => dispatch(getRateFailure()))
-      .then((data) => {
-        dispatch(getRateSuccess(data))
-      })
+      .then((resp) => resp.json(), error => dispatch(getRateFailure(error.message)))
+      .then((data) => dispatch(getRateSuccess(data)))
       .then(() => {
         let lastestStoreState = getState()
         if (lastestStoreState.currency.isExchangeFromFocused) {
-          return caculateTargetAmount(lastestStoreState)
-            .then((expectAmount) => dispatch(updateTargetAmount(expectAmount)))
-          
+          return dispatch(caculateTargetAmount(lastestStoreState))          
         } else {
-          return caculateSourceAmount(lastestStoreState)
-            .then((expectAmount) => dispatch(updateSourceAmount(expectAmount)))
+          return dispatch(caculateSourceAmount(lastestStoreState))
         }
       })
   }
@@ -68,7 +59,7 @@ export const getRateTimerStart = () => {
     
     return Promise.resolve(dispatch({ type: START_RATE_TIMER }))
       .then(() => { dispatch(getRate()) })
-      .then(() => { timer = setInterval(() => { dispatch(getRate()) }, 1000 * 60 * 60) })
+      .then(() => { timer = setInterval(() => { dispatch(getRate()) }, 1000 * 10) })
   }
 }
 
