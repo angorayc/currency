@@ -1,5 +1,5 @@
 import configs from '../configs'
-// import { caculateSourceAmount, caculateTargetAmount } from './currencyActions'
+import { handleFromAmountInput, handleToAmountInput } from './currencyActions'
 import fx from 'money'
 import { get as _get } from 'lodash'
 import numeral from 'numeral'
@@ -198,6 +198,17 @@ const getRates = () => {
       dispatch(getFeeRate()),
       dispatch(getRate())
     ])
+    .then(() => {
+      let storeState = getState()
+      let isExchangeFromFocused = storeState.currency.isExchangeFromFocused
+      let exchangeFrom = _get(storeState.currency, 'exchangeFrom.exchangeAmount')
+      let exchangeTo = _get(storeState.currency, 'exchangeTo.exchangeAmount')
+
+      if (isExchangeFromFocused)
+        return dispatch(handleFromAmountInput(exchangeFrom))
+      else
+        return dispatch(handleToAmountInput(exchangeTo))
+    })
   }
 }
 
