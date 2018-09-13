@@ -1,13 +1,13 @@
 import * as actions from '../actions/exchangeActions'
 
-const exchangeRate = function(state = { data: null, error: null }, action) {
+const feeRate = function(state = { data: null, error: null }, action) {
   switch (action.type) {
-    case actions.GET_RATE_START:
+    case actions.GET_FEE_RATE_START:
       return {
         data: null,
         error: null
       }
-    case actions.GET_RATE_SUCCESS:
+    case actions.GET_FEE_RATE_SUCCESS:
     {
       let rates = action.data.rates || {}
       let fixed = {}
@@ -20,7 +20,7 @@ const exchangeRate = function(state = { data: null, error: null }, action) {
         error: null
       }
     }
-    case actions.GET_RATE_FAILURE:
+    case actions.GET_FEE_RATE_FAILURE:
       return {
         data: null,
         error: action.error
@@ -29,4 +29,4 @@ const exchangeRate = function(state = { data: null, error: null }, action) {
       return state
   }
 }
-export default exchangeRate
+export default feeRate

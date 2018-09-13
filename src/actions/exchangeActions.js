@@ -7,6 +7,11 @@ import numeral from 'numeral'
 export const GET_RATE_START = 'GET_RATE_START'
 export const GET_RATE_SUCCESS = 'GET_RATE_SUCCESS'
 export const GET_RATE_FAILURE = 'GET_RATE_FAILURE'
+
+export const GET_FEE_RATE_START = 'GET_FEE_RATE_START'
+export const GET_FEE_RATE_SUCCESS = 'GET_FEE_RATE_SUCCESS'
+export const GET_FEE_RATE_FAILURE = 'GET_FEE_RATE_FAILURE'
+
 export const START_RATE_TIMER = 'START_RATE_TIMER'
 export const CLEAR_RATE_TIMER = 'CLEAR_RATE_TIMER'
 export const EXCHANGE_SUBMIT = 'EXCHANGE_SUBMIT'
@@ -28,9 +33,30 @@ const getRateSuccess = (data) => {
   }
 }
 
-const getRateFailure = () => {
+const getRateFailure = (error) => {
   return {
-    type: GET_RATE_FAILURE
+    type: GET_RATE_FAILURE,
+    error
+  }
+}
+
+const getFeeRateStart = () => {
+  return {
+    type: GET_FEE_RATE_START
+  }
+}
+
+const getFeeRateSuccess = (data) => {
+  return {
+    type: GET_FEE_RATE_SUCCESS,
+    data
+  }
+}
+
+const getFeeRateFailure = (error) => {
+  return {
+    type: GET_FEE_RATE_FAILURE,
+    error
   }
 }
 
@@ -88,11 +114,12 @@ export const getFeeRate = () => {
     let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
     let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
 
-    dispatch({ type: 'GET_FEE_RATE' })
+    dispatch(getFeeRateStart())
 
     return sendGetRateRequest(fromCurrency, symbols)
-      .then((resp) => resp.json(), error => dispatch(getRateFailure(error.message)))
-      .then((data) => fx.rates = data.rates )
+      .then((resp) => resp.json(), error => dispatch(getFeeRateFailure(_get(error, 'message', error))))
+      .then((data) => dispatch(getFeeRateSuccess(data)))
+      .then((data) => fx.rates = Object.assign({}, _get(getState(), 'fee.data.rates')))
       .then(() => fx(exchangeAmount).from(fromCurrency).to(feeBase))
       .then((expectAmount) => {
         let chargable = expectAmount - configs.exchange.FREE_EXCHANGE_LIMIT
@@ -100,7 +127,7 @@ export const getFeeRate = () => {
         let isExchangeFromFocused = storeState.currency.isExchangeFromFocused
 
         return new Promise((resolve) => {
-          let rates = _get(getState().exchange, 'data.rates')          
+          let rates = _get(getState(), 'fee.data.rates')          
           resolve(fx.rates = Object.assign({}, rates))
         })
           .then(() => {
@@ -118,8 +145,7 @@ export const getFeeRate = () => {
             return dispatch(event(feeToShow))
           })
       })
-      .catch(e => {
-      })
+      .catch(e => { dispatch(getFeeRateFailure(_get(e, 'message', e))) })
   }
 }
 
