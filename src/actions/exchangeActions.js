@@ -1,5 +1,5 @@
 import configs from '../configs'
-import { caculateSourceAmount, caculateTargetAmount } from './currencyActions'
+// import { caculateSourceAmount, caculateTargetAmount } from './currencyActions'
 import fx from 'money'
 import { get as _get } from 'lodash'
 import numeral from 'numeral'
@@ -74,7 +74,7 @@ const showFromFee = (fee) => {
   }
 }
 
-export const getRate = () => {
+const getRate = () => {
 
   return (dispatch, getState) => {
     dispatch(getRateStart())
@@ -85,14 +85,14 @@ export const getRate = () => {
     return sendGetRateRequest(base, symbols)
       .then((resp) => resp.json(), error => dispatch(getRateFailure(error.message)))
       .then((data) => dispatch(getRateSuccess(data)))
-      .then(() => {
-        let lastestStoreState = getState()
-        if (lastestStoreState.currency.isExchangeFromFocused) {
-          return dispatch(caculateTargetAmount(lastestStoreState))          
-        } else {
-          return dispatch(caculateSourceAmount(lastestStoreState))
-        }
-      })
+      // .then(() => {
+      //   let lastestStoreState = getState()
+      //   if (lastestStoreState.currency.isExchangeFromFocused) {
+      //     return dispatch(caculateTargetAmount(lastestStoreState))          
+      //   } else {
+      //     return dispatch(caculateSourceAmount(lastestStoreState))
+      //   }
+      // })
   }
 }
 
@@ -106,46 +106,69 @@ const getSymbols = () => {
 
 export const getFeeRate = () => {
   let symbols = getSymbols()
-  let feeBase = configs.currency[configs.exchange.EXCHANGE_BASE_CODE]
+  // let feeBase = configs.currency[configs.exchange.EXCHANGE_BASE_CODE]
 
   return (dispatch, getState) => {
     let storeState = getState()
-    let exchangeAmount = _get(storeState.currency, 'exchangeFrom.exchangeAmount')
+    // let exchangeAmount = _get(storeState.currency, 'exchangeFrom.exchangeAmount')
     let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
-    let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
+    // let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
 
     dispatch(getFeeRateStart())
 
     return sendGetRateRequest(fromCurrency, symbols)
       .then((resp) => resp.json(), error => dispatch(getFeeRateFailure(_get(error, 'message', error))))
       .then((data) => dispatch(getFeeRateSuccess(data)))
-      .then((data) => fx.rates = Object.assign({}, _get(getState(), 'fee.data.rates')))
-      .then(() => fx(exchangeAmount).from(fromCurrency).to(feeBase))
-      .then((expectAmount) => {
-        let chargable = expectAmount - configs.exchange.FREE_EXCHANGE_LIMIT
-        let feeInBase = chargable * configs.exchange.EXCHANGE_FEE_PERCENTAGE
-        let isExchangeFromFocused = storeState.currency.isExchangeFromFocused
-
-        return new Promise((resolve) => {
-          let rates = _get(getState(), 'fee.data.rates')          
-          resolve(fx.rates = Object.assign({}, rates))
-        })
-          .then(() => {
-            let target = isExchangeFromFocused ? toCurrency : fromCurrency
-            if (feeInBase > 0)
-              return fx(feeInBase).from(feeBase).to(target)
-            else
-              return 0
-          })
-          .then((fee) => {
-            return fee > 0 ? numeral(fee).format('0.00') : ''
-          })
-          .then((feeToShow) => {
-            let event = isExchangeFromFocused ? showToFee : showFromFee
-            return dispatch(event(feeToShow))
-          })
-      })
       .catch(e => { dispatch(getFeeRateFailure(_get(e, 'message', e))) })
+  }
+}
+
+export const caculateFeeRate = () => {
+
+  return (dispatch, getState) => {
+    let feeBase = configs.currency[configs.exchange.EXCHANGE_BASE_CODE]
+    let storeState = getState()
+    let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
+    let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
+    let exchangeAmount = _get(storeState.currency, 'exchangeFrom.exchangeAmount')
+    let rates = _get(storeState, 'exchange.data.rates', {})
+    let feeRates = _get(storeState, 'fee.data.rates', {})
+    let isExchangeFromFocused = storeState.currency.isExchangeFromFocused
+
+    return Promise.resolve(fx.rates = Object.assign({}, rates))
+    .then(() => {
+      console.log('----a-1----', exchangeAmount, fromCurrency, feeBase)
+      if (exchangeAmount > 0)
+        return fx(exchangeAmount).from(fromCurrency).to(feeBase)
+      else
+        return 0
+    })
+    .then((expectAmount) => {
+      console.log('----a-2----', exchangeAmount, fromCurrency, feeBase)
+
+      fx.rates = Object.assign({}, feeRates)
+      return expectAmount
+    }, (e) => { console.log('----c1---', e, rates, exchangeAmount, fromCurrency, feeBase)})
+    .then((expectAmount) => {
+      let target = isExchangeFromFocused ? toCurrency : fromCurrency
+      let chargable = expectAmount - configs.exchange.FREE_EXCHANGE_LIMIT
+      let feeInBase = chargable * configs.exchange.EXCHANGE_FEE_PERCENTAGE
+      console.log('----a-3----', feeInBase, feeBase, target)
+
+      if (feeInBase > 0)
+        return fx(feeInBase).from(feeBase).to(target)
+      else
+        return 0
+    }, (e) => { console.log('----c2---', e)})
+    .then((fee) => {
+      return fee > 0 ? numeral(fee).format('0.00') : ''
+    })
+    .then((feeToShow) => {
+      let isExchangeFromFocused = storeState.currency.isExchangeFromFocused
+      let event = isExchangeFromFocused ? showToFee : showFromFee
+      return dispatch(event(feeToShow))
+    })
+    .catch((e) => { console.log('----c3---', e) })
   }
 }
 
@@ -159,9 +182,22 @@ export const sendGetRateRequest = (base, symbols) => {
 export const getRateTimerStart = () => {
   return (dispatch, getState) => {    
     
-    return Promise.resolve(dispatch({ type: START_RATE_TIMER }))
-      .then(() => { dispatch(getRate()) })
-      .then(() => { timer = setInterval(() => { dispatch(getRate()) }, 1000 * configs.exchange.UPDATE_RATE_FREQUENCY) })
+    dispatch({ type: START_RATE_TIMER })
+    return Promise.resolve(dispatch(getRates()))
+      .then(() => {
+        timer = setInterval(() => {
+          dispatch(getRates())
+        }, 1000 * configs.exchange.UPDATE_RATE_FREQUENCY)
+      })
+  }
+}
+
+const getRates = () => {
+  return (dispatch, getState) => {
+    return Promise.all([
+      dispatch(getFeeRate()),
+      dispatch(getRate())
+    ])
   }
 }
 

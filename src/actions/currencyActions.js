@@ -1,4 +1,4 @@
-import { getRateTimerRestart, getFeeRate } from './exchangeActions'
+import { getRateTimerRestart, caculateFeeRate } from './exchangeActions'
 import configs from '../configs'
 import { get as _get } from 'lodash'
 import numeral from 'numeral'
@@ -34,20 +34,27 @@ export const swapCurrency = () => {
     let storeState = getState()
     let exchangeFrom = _get(storeState.currency, 'exchangeFrom.currencyCode')
     let exchangeTo = _get(storeState.currency, 'exchangeTo.currencyCode')
-
-    let sourceAmount = storeState.currency.isExchangeFromFocused ? 'exchangeFrom' : 'exchangeTo'
+    let isExchangeFromFocusedBeforeSwap = storeState.currency.isExchangeFromFocused
+    let sourceAmount = isExchangeFromFocusedBeforeSwap ? 'exchangeFrom' : 'exchangeTo'
     let baseAmount = _get(storeState.currency, `${sourceAmount}.exchangeAmount`)
 
     return Promise.resolve(dispatch(handleFromCurrencyChanged(exchangeTo)))
       .then(() => dispatch(handleToCurrencyChanged(exchangeFrom)))
+      //// .then(() => dispatch(caculateFeeRate()))
       .then(() => {
-        if (storeState.currency.isExchangeFromFocused)
+        if (isExchangeFromFocusedBeforeSwap)
           return dispatch(updateTargetAmount(baseAmount))
         else
           return dispatch(updateSourceAmount(baseAmount))
       })
       .then(() => dispatch({ type: SWAP_CURRENCY }))
-      .then(() => dispatch(getFeeRate()))
+      .then(() => {
+        if (isExchangeFromFocusedBeforeSwap)
+          return dispatch(handleToAmountInput(baseAmount))
+        else
+          return dispatch(handleFromAmountInput(baseAmount))
+      })
+      
 
   }
 }
@@ -122,31 +129,32 @@ export const caculateTargetAmount = () => {
     let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
     let toCurrencyFee = _get(storeState.currency, 'exchangeTo.fee')
 
-    return new Promise((resolve) => {
-
-      if (rates)
-        resolve(rates)
-    })
-    .then((rates) => { 
-      fx.rates = Object.assign({}, rates)
-    })
-    .then(() => {
-      console.log('---', exchangeAmount)
-      if (exchangeAmount !== ''){
-        return fx(numeral(exchangeAmount || 0).value()).from(fromCurrency).to(toCurrency)
-      } else {
-        return exchangeAmount
-      }
-    })
-    .then((expectAmount) => {
-      let numeralAmount = numeral(expectAmount || 0)
-      numeralAmount.difference(numeral(toCurrencyFee || 0).value())
-      let updateValue = numeralAmount.value() ? numeralAmount.format('0.00') : expectAmount
-      return dispatch(updateTargetAmount(updateValue))
-    })
-    .catch((e) => {
-      return e
-    })
+    return Promise.resolve(dispatch(caculateFeeRate()))
+      .then(() => { 
+        fx.rates = Object.assign({}, rates)
+      })
+      .then(() => {
+        if (exchangeAmount > 0){
+          console.log('---a0---', numeral(exchangeAmount).value(), fromCurrency, toCurrency, rates)
+          return fx(numeral(exchangeAmount).value()).from(fromCurrency).to(toCurrency)
+        } else {
+          return exchangeAmount
+        }
+      }, (e) => {
+        console.log('---a---', e)
+      })
+      .then((expectAmount) => {
+        console.log('------b0----', expectAmount)
+        let numeralAmount = numeral(expectAmount || 0)
+        numeralAmount.difference(numeral(toCurrencyFee || 0).value())
+        let updateValue = numeralAmount.value() ? numeralAmount.format('0.00') : expectAmount
+        return dispatch(updateTargetAmount(updateValue))
+      }, (e) => {
+        console.log('---b---', e, exchangeAmount)
+      })
+      .catch((e) => {
+        console.log('---c---', e)
+      })
   }
 }
 
@@ -159,25 +167,22 @@ export const caculateSourceAmount = () => {
     let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
     let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
     let fromCurrencyFee = _get(storeState.currency, 'exchangeFrom.fee')
-    return new Promise((resolve) => {
-      if (rates)
-        resolve(rates)
-    })
-    .then((rates) => { 
-      return fx.rates = Object.assign({}, rates)
-    })
-    .then(() => {
-      return exchangeAmount ? fx(numeral(exchangeAmount || 0).value()).from(toCurrency).to(fromCurrency) : exchangeAmount
-    })
-    .then((expectAmount) => {
-      let numeralAmount = numeral(expectAmount || 0)
-      numeralAmount.add(numeral(fromCurrencyFee || 0).value())
-      let updateValue = numeralAmount.value() ? numeralAmount.format('0.00') : expectAmount
-      return dispatch(updateSourceAmount(updateValue))        
-    })
-    .catch((e) => {
-      return ''
-    })
+    return Promise.resolve(dispatch(caculateFeeRate()))
+      .then(() => { 
+        return fx.rates = Object.assign({}, rates)
+      })
+      .then(() => {
+        return exchangeAmount ? fx(numeral(exchangeAmount || 0).value()).from(toCurrency).to(fromCurrency) : exchangeAmount
+      })
+      .then((expectAmount) => {
+        let numeralAmount = numeral(expectAmount || 0)
+        numeralAmount.add(numeral(fromCurrencyFee || 0).value())
+        let updateValue = numeralAmount.value() ? numeralAmount.format('0.00') : expectAmount
+        return dispatch(updateSourceAmount(updateValue))        
+      })
+      .catch((e) => {
+        return ''
+      })
   }
 }
 
@@ -193,10 +198,10 @@ export const handleFromAmountInput = (exchangeAmount) => {
       else {
         setTimeout(() => {
           dispatch(handleFromAmountInput(exchangeAmount))
-        }, 1000 * 0.5)
+        }, 1000 * configs.exchange.RETRY_FREQUENCY)
       }
     })
-    .then(() => dispatch(getFeeRate()))
+    //.then(() => dispatch(caculateFeeRate()))
     .then(() => dispatch(caculateTargetAmount()))
 
   }
@@ -212,10 +217,10 @@ export const handleToAmountInput = (exchangeAmount) => {
       else {
         setTimeout(() => {
           dispatch(handleToAmountInput(exchangeAmount))
-        }, 1000 * 0.5)
+        }, 1000 * configs.exchange.RETRY_FREQUENCY)
       }
     })
-    .then(() => dispatch(getFeeRate()))
+    // .then(() => dispatch(caculateFeeRate()))
     .then(() => dispatch(caculateSourceAmount()))
   }
 }
