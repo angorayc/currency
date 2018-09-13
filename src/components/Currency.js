@@ -166,7 +166,7 @@ class Currency extends React.Component {
       [classes.exchangeToContainer]: !isFrom
     })
     let minAmount = showMinAmountHint ? numeral(configs.exchange.MIN_EXCHANGE_AMOUNT).format('0.00') : ''
-    let displayFee = showFee? numeral(fee).format('0,0.00') : ''
+    let displayFee = showFee? numeral(fee || 0).format('0,0.00') : ''
 
     return (
       <div className={rootClasses}>

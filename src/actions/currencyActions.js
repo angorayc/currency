@@ -120,9 +120,10 @@ export const caculateTargetAmount = () => {
     let rates = _get(storeState.exchange, 'data.rates')
     let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
     let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
-    // let toCurrencyFee = _get(storeState.currency, 'exchangeTo.fee')
+    let toCurrencyFee = _get(storeState.currency, 'exchangeTo.fee')
 
     return new Promise((resolve) => {
+
       if (rates)
         resolve(rates)
     })
@@ -130,15 +131,21 @@ export const caculateTargetAmount = () => {
       fx.rates = Object.assign({}, rates)
     })
     .then(() => {
-      return exchangeAmount ? fx(exchangeAmount).from(fromCurrency).to(toCurrency) : exchangeAmount
+      console.log('---', exchangeAmount)
+      if (exchangeAmount !== ''){
+        return fx(numeral(exchangeAmount || 0).value()).from(fromCurrency).to(toCurrency)
+      } else {
+        return exchangeAmount
+      }
     })
     .then((expectAmount) => {
-      let numeralAmount = numeral(expectAmount)
+      let numeralAmount = numeral(expectAmount || 0)
+      numeralAmount.difference(numeral(toCurrencyFee || 0).value())
       let updateValue = numeralAmount.value() ? numeralAmount.format('0.00') : expectAmount
       return dispatch(updateTargetAmount(updateValue))
     })
     .catch((e) => {
-      return ''
+      return e
     })
   }
 }
@@ -151,7 +158,7 @@ export const caculateSourceAmount = () => {
     let rates = _get(storeState.exchange, 'data.rates')
     let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
     let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
-    // let fromCurrencyFee = _get(storeState.currency, 'exchangeFrom.fee')
+    let fromCurrencyFee = _get(storeState.currency, 'exchangeFrom.fee')
     return new Promise((resolve) => {
       if (rates)
         resolve(rates)
@@ -160,10 +167,11 @@ export const caculateSourceAmount = () => {
       return fx.rates = Object.assign({}, rates)
     })
     .then(() => {
-      return exchangeAmount ? fx(exchangeAmount).from(toCurrency).to(fromCurrency) : exchangeAmount
+      return exchangeAmount ? fx(numeral(exchangeAmount || 0).value()).from(toCurrency).to(fromCurrency) : exchangeAmount
     })
     .then((expectAmount) => {
-      let numeralAmount = numeral(expectAmount)
+      let numeralAmount = numeral(expectAmount || 0)
+      numeralAmount.add(numeral(fromCurrencyFee || 0).value())
       let updateValue = numeralAmount.value() ? numeralAmount.format('0.00') : expectAmount
       return dispatch(updateSourceAmount(updateValue))        
     })
