@@ -5,7 +5,7 @@ export default {
   EXCHANGE_FEE_PERCENTAGE: 0.005,
   API_HOST: 'https://data.fixer.io',
   GET_LATEST_RATE: '/api/latest',
-  APP_ID: '21364f79333f0573a5c22c1305d1db5d',
+  APP_ID: process.env.REACT_APP_API_KEY,
   EXCHANGE_BASE_CODE: 0,
   MAX_AMOUNT_LENGTH: 18
 }
