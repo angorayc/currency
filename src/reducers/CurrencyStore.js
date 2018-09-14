@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux'
 import * as actions from '../actions/currencyActions'
-import { SHOW_TO_FEE, SHOW_FROM_FEE } from '../actions/exchangeActions'
+import { SHOW_TO_FEE, SHOW_FROM_FEE, CAL_FEE_RATE_ERROR } from '../actions/exchangeActions'
 import configs from '../configs'
 const defaultExchangeFrom = configs.exchange.EXCHANGE_BASE_CODE
 const defaultExchangeTo = 1
@@ -89,9 +89,19 @@ const isExchangeFromFocused = function(state = true, action) {
   }
 }
 
+const message = function(state = '', action) {
+  switch (action.type) {
+    case CAL_FEE_RATE_ERROR:
+      return action.error
+    default:
+      return state
+  }
+}
+
 const CurrencyStore = combineReducers({
   exchangeFrom,
   exchangeTo,
-  isExchangeFromFocused
+  isExchangeFromFocused,
+  message
 })
 export default CurrencyStore

@@ -18,6 +18,8 @@ export const EXCHANGE_SUBMIT = 'EXCHANGE_SUBMIT'
 export const SHOW_TO_FEE = 'SHOW_TO_FEE'
 export const SHOW_FROM_FEE = 'SHOW_FROM_FEE'
 
+export const CAL_FEE_RATE_ERROR = 'CAL_FEE_RATE_ERROR'
+
 let timer
 
 const getRateStart = () => {
@@ -74,6 +76,13 @@ const showFromFee = (fee) => {
   }
 }
 
+export const caculationError = (error) => {
+  return {
+    type: CAL_FEE_RATE_ERROR,
+    error
+  }
+}
+
 const getRate = () => {
 
   return (dispatch, getState) => {
@@ -85,14 +94,6 @@ const getRate = () => {
     return sendGetRateRequest(base, symbols)
       .then((resp) => resp.json(), error => dispatch(getRateFailure(error.message)))
       .then((data) => dispatch(getRateSuccess(data)))
-      // .then(() => {
-      //   let lastestStoreState = getState()
-      //   if (lastestStoreState.currency.isExchangeFromFocused) {
-      //     return dispatch(caculateTargetAmount(lastestStoreState))          
-      //   } else {
-      //     return dispatch(caculateSourceAmount(lastestStoreState))
-      //   }
-      // })
   }
 }
 
@@ -106,20 +107,16 @@ const getSymbols = () => {
 
 export const getFeeRate = () => {
   let symbols = getSymbols()
-  // let feeBase = configs.currency[configs.exchange.EXCHANGE_BASE_CODE]
 
   return (dispatch, getState) => {
-    let storeState = getState()
-    // let exchangeAmount = _get(storeState.currency, 'exchangeFrom.exchangeAmount')
-    let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
-    // let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
+    let base = configs.currency[configs.exchange.EXCHANGE_BASE_CODE]
 
     dispatch(getFeeRateStart())
 
-    return sendGetRateRequest(fromCurrency, symbols)
-      .then((resp) => resp.json(), error => dispatch(getFeeRateFailure(_get(error, 'message', error))))
+    return sendGetRateRequest(base, symbols)
+      .then((resp) => resp.json())
       .then((data) => dispatch(getFeeRateSuccess(data)))
-      .catch(e => { dispatch(getFeeRateFailure(_get(e, 'message', e))) })
+      .catch(e => { dispatch(getFeeRateFailure(e)) })
   }
 }
 
@@ -137,29 +134,25 @@ export const caculateFeeRate = () => {
 
     return Promise.resolve(fx.rates = Object.assign({}, rates))
     .then(() => {
-      console.log('----a-1----', exchangeAmount, fromCurrency, feeBase)
       if (exchangeAmount > 0)
         return fx(exchangeAmount).from(fromCurrency).to(feeBase)
       else
         return 0
     })
     .then((expectAmount) => {
-      console.log('----a-2----', exchangeAmount, fromCurrency, feeBase)
-
       fx.rates = Object.assign({}, feeRates)
       return expectAmount
-    }, (e) => { console.log('----c1---', e, rates, exchangeAmount, fromCurrency, feeBase)})
+    })
     .then((expectAmount) => {
       let target = isExchangeFromFocused ? toCurrency : fromCurrency
       let chargable = expectAmount - configs.exchange.FREE_EXCHANGE_LIMIT
       let feeInBase = chargable * configs.exchange.EXCHANGE_FEE_PERCENTAGE
-      console.log('----a-3----', feeInBase, feeBase, target)
 
       if (feeInBase > 0)
         return fx(feeInBase).from(feeBase).to(target)
       else
         return 0
-    }, (e) => { console.log('----c2---', e)})
+    })
     .then((fee) => {
       return fee > 0 ? numeral(fee).format('0.00') : ''
     })
@@ -168,7 +161,7 @@ export const caculateFeeRate = () => {
       let event = isExchangeFromFocused ? showToFee : showFromFee
       return dispatch(event(feeToShow))
     })
-    .catch((e) => { console.log('----c3---', e) })
+    .catch((e) => dispatch(caculationError(e)))
   }
 }
 
@@ -192,12 +185,18 @@ export const getRateTimerStart = () => {
   }
 }
 
-const getRates = () => {
-  return (dispatch, getState) => {
+export const sendGetRatesRequest = () => {
+  return (dispatch) => {
     return Promise.all([
       dispatch(getFeeRate()),
       dispatch(getRate())
     ])
+  }
+}
+
+export const getRates = () => {
+  return (dispatch, getState) => {
+    return Promise.resolve(dispatch(sendGetRatesRequest()))
     .then(() => {
       let storeState = getState()
       let isExchangeFromFocused = storeState.currency.isExchangeFromFocused
