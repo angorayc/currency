@@ -36,12 +36,14 @@ const styles = () => ({
     textAlign: 'right'
   },
   balanceHint: {
-    textAlign: 'left'
+    textAlign: 'left',
+    color: configs.colors.pink
   },
   feeHint: {
     textAlign: 'right'
   },
   exchangeHint: {
+    textAlign: 'right',
     color: configs.colors.pink
   },
   infoIcon: {
@@ -156,7 +158,6 @@ class Currency extends React.Component {
     let showMinAmountHint = exchangeAmount > 0 && exchangeAmount < configs.exchange.MIN_EXCHANGE_AMOUNT
     let isFrom = exchangeType === 'from'
     let balanceClassNames = classnames({
-        [classes.exchangeHint]: exchangeAmount > balance && isFrom,
         [classes.balanceHint]: true
       })
     let showFee = !isActive && fee
