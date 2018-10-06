@@ -12,7 +12,8 @@ const mapStateToProps = state => {
   let targetCurrencyName = _get(state.currency, 'exchangeTo.currencyName')
   let targetRate = _get(rates, targetCurrencyName)
   let exchangeAmount = _get(state.currency, 'exchangeFrom.exchangeAmount')
-  let balance = _get(state.currency, 'exchangeFrom.balance')
+  let currencyCode = _get(state.currency, 'exchangeFrom.currencyCode')
+  let balance = _get(state.currency, `exchangeFrom.balance.${currencyCode}`)
   return {
     enableExchangeBtn: (targetRate
       && (exchangeAmount > configs.exchange.MIN_EXCHANGE_AMOUNT)

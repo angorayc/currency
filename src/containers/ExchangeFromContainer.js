@@ -6,13 +6,13 @@ import { get as _get } from 'lodash'
 const mapStateToProps = state => {
   let exchangeFrom = _get(state.currency, 'exchangeFrom', {})
   let exchangeBase = _get(state.exchange, 'data.base', {})
-
+  let currencyCode = exchangeFrom.currencyCode
   return {
-    currencyCode: exchangeFrom.currencyCode,
+    currencyCode: currencyCode,
     currencyName: exchangeFrom.currencyName,
     exchangeType: exchangeFrom.exchangeType,
     exchangeAmount: exchangeFrom.exchangeAmount,
-    balance: exchangeFrom.balance,
+    balance: exchangeFrom.balance[currencyCode],
     enableAmountInput: exchangeBase === exchangeFrom.currencyName,
     isActive: state.currency.isExchangeFromFocused,
     fee: exchangeFrom.fee

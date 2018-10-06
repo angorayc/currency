@@ -4,12 +4,13 @@ import { SHOW_TO_FEE, SHOW_FROM_FEE, CAL_FEE_RATE_ERROR } from '../actions/excha
 import configs from '../configs'
 const defaultExchangeFrom = configs.exchange.EXCHANGE_BASE_CODE
 const defaultExchangeTo = 1
+const initialBalance = [100, 50, 0]
 const initialFrom = {
   currencyCode: defaultExchangeFrom,
   exchangeType: 'from',
   currencyName: configs.currency[defaultExchangeFrom],
   exchangeAmount: '',
-  balance: 0,
+  balance: initialBalance,
   fee: ''
 }
 const initialTo = {
@@ -17,7 +18,7 @@ const initialTo = {
   exchangeType: 'to',
   currencyName: configs.currency[defaultExchangeTo],
   exchangeAmount: '',
-  balance: 0,
+  balance: initialBalance,
   fee: ''
 }
 const exchangeFrom = function(state = initialFrom, action) {
@@ -28,13 +29,12 @@ const exchangeFrom = function(state = initialFrom, action) {
 
       return Object.assign({}, state, {
         currencyCode: currencyCode,
-        currencyName: configs.currency[currencyCode]
+        currencyName: configs.currency[currencyCode],
       })
     case actions.INPUT_FROM_AMOUNT:
 
       return Object.assign({}, state, {
-        exchangeAmount: exchangeAmount,
-        balance: 0
+        exchangeAmount: exchangeAmount
       })
     case SHOW_FROM_FEE:
       return Object.assign({}, state, {
@@ -60,8 +60,7 @@ const exchangeTo = function(state = initialTo, action) {
     case actions.INPUT_TO_AMOUNT:
 
       return Object.assign({}, state, {
-        exchangeAmount: exchangeAmount,
-        balance: 0
+        exchangeAmount: exchangeAmount
       })
     case SHOW_TO_FEE:
       return Object.assign({}, state, {
