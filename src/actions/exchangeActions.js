@@ -19,6 +19,7 @@ export const SHOW_TO_FEE = 'SHOW_TO_FEE'
 export const SHOW_FROM_FEE = 'SHOW_FROM_FEE'
 
 export const CAL_FEE_RATE_ERROR = 'CAL_FEE_RATE_ERROR'
+export const HANDLE_SUBMIT_EXCHANGE = 'HANDLE_SUBMIT_EXCHANGE'
 
 let timer
 
@@ -231,5 +232,32 @@ export const getRateTimerRestart = () => {
 export const handleExchangeSubmit = () => {
   return {
     type: EXCHANGE_SUBMIT
+  }
+}
+
+export const handleExchange = () => {
+  return (dispatch, getState) => {
+    let storeState = getState()
+    let fromCurrencyCode = _get(storeState.currency, 'exchangeFrom.currencyCode')
+    let fromCurrencyAmount = _get(storeState.currency, 'exchangeFrom.exchangeAmount')
+    let toCurrencyCode = _get(storeState.currency, 'exchangeTo.currencyCode')
+    let toCurrencyAmount = _get(storeState.currency, 'exchangeTo.exchangeAmount')
+    let exchangeInfo = {
+      fromCurrencyCode,
+      fromCurrencyAmount,
+      toCurrencyCode,
+      toCurrencyAmount
+    }
+    return dispatch(exchange(exchangeInfo))
+  }
+}
+
+const exchange = (exchangeInfo) => {
+  return {
+    type: HANDLE_SUBMIT_EXCHANGE,
+    fromCurrencyCode: exchangeInfo.fromCurrencyCode,
+    fromCurrencyAmount: exchangeInfo.fromCurrencyAmount,
+    toCurrencyCode: exchangeInfo.toCurrencyCode,
+    toCurrencyAmount: exchangeInfo.toCurrencyAmount
   }
 }

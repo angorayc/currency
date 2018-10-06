@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import ExchangeSubmitBtn from '../components/ExchangeSubmitBtn'
-import { handleExchangeSubmit } from '../actions/exchangeActions'
+import { handleExchangeSubmit, handleExchange } from '../actions/exchangeActions'
 import configs from '../configs'
 import { get as _get } from 'lodash'
 
@@ -25,6 +25,9 @@ const mapDispatchToProps = dispatch => {
   return {
     onFormSubmit: () => {
       dispatch(handleExchangeSubmit())
+    },
+    onEachangeSubmit: () => {
+      dispatch(handleExchange())
     }
   }
 }

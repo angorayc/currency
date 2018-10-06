@@ -22,10 +22,10 @@ const styles = theme => ({
 
 class ExchangeSubmitBtn extends React.Component {
   render() {
-    let { enableExchangeBtn, classes } = this.props
+    let { enableExchangeBtn, classes, onEachangeSubmit } = this.props
     return (
       <div className={classes.submitContainer}>
-        <Button variant="extendedFab" className={classes.submitBtn} disabled={!enableExchangeBtn}>
+        <Button variant="extendedFab" className={classes.submitBtn} disabled={!enableExchangeBtn} onClick={onEachangeSubmit}>
           <TrendingUpIcon />
           Exchange
         </Button>

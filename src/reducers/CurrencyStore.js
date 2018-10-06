@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux'
 import * as actions from '../actions/currencyActions'
-import { SHOW_TO_FEE, SHOW_FROM_FEE, CAL_FEE_RATE_ERROR } from '../actions/exchangeActions'
+import { SHOW_TO_FEE, SHOW_FROM_FEE, CAL_FEE_RATE_ERROR, HANDLE_SUBMIT_EXCHANGE } from '../actions/exchangeActions'
 import configs from '../configs'
 const defaultExchangeFrom = configs.exchange.EXCHANGE_BASE_CODE
 const defaultExchangeTo = 1
@@ -44,6 +44,18 @@ const exchangeFrom = function(state = initialFrom, action) {
       return Object.assign({}, state, {
         fee: ''
       })
+    case HANDLE_SUBMIT_EXCHANGE:
+    {
+      let fromCurrencyCode = action.fromCurrencyCode
+      let fromCurrencyAmount = action.fromCurrencyAmount
+      let newBalance = state.balance
+      newBalance[fromCurrencyCode] -= fromCurrencyAmount
+      return Object.assign({}, state, {
+        exchangeAmount: '',
+        fee: '',
+        balance: newBalance
+      })
+    }
     default:
       return state
   }
@@ -70,6 +82,18 @@ const exchangeTo = function(state = initialTo, action) {
       return Object.assign({}, state, {
         fee: ''
       })
+      case HANDLE_SUBMIT_EXCHANGE:
+      {
+        let toCurrencyCode = action.toCurrencyCode
+        let toCurrencyAmount = action.toCurrencyAmount
+        let newBalance = state.balance
+        newBalance[toCurrencyCode] += toCurrencyAmount
+        return Object.assign({}, state, {
+          exchangeAmount: '',
+          fee: '',
+          balance: newBalance
+        })
+      }
     default:
       return state
   }
