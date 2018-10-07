@@ -8,10 +8,6 @@ export const GET_RATE_START = 'GET_RATE_START'
 export const GET_RATE_SUCCESS = 'GET_RATE_SUCCESS'
 export const GET_RATE_FAILURE = 'GET_RATE_FAILURE'
 
-export const GET_FEE_RATE_START = 'GET_FEE_RATE_START'
-export const GET_FEE_RATE_SUCCESS = 'GET_FEE_RATE_SUCCESS'
-export const GET_FEE_RATE_FAILURE = 'GET_FEE_RATE_FAILURE'
-
 export const START_RATE_TIMER = 'START_RATE_TIMER'
 export const CLEAR_RATE_TIMER = 'CLEAR_RATE_TIMER'
 export const EXCHANGE_SUBMIT = 'EXCHANGE_SUBMIT'
@@ -23,11 +19,6 @@ export const HANDLE_SUBMIT_EXCHANGE = 'HANDLE_SUBMIT_EXCHANGE'
 
 let timer
 
-const getRateStart = () => {
-  return {
-    type: GET_RATE_START
-  }
-}
 
 const getRateSuccess = (data) => {
   return {
@@ -39,26 +30,6 @@ const getRateSuccess = (data) => {
 const getRateFailure = (error) => {
   return {
     type: GET_RATE_FAILURE,
-    error
-  }
-}
-
-const getFeeRateStart = () => {
-  return {
-    type: GET_FEE_RATE_START
-  }
-}
-
-const getFeeRateSuccess = (data) => {
-  return {
-    type: GET_FEE_RATE_SUCCESS,
-    data
-  }
-}
-
-const getFeeRateFailure = (error) => {
-  return {
-    type: GET_FEE_RATE_FAILURE,
     error
   }
 }
@@ -84,20 +55,6 @@ export const caculationError = (error) => {
   }
 }
 
-const getRate = () => {
-
-  return (dispatch, getState) => {
-    dispatch(getRateStart())
-    let storeState = getState()
-    let base = storeState.currency.exchangeFrom.currencyName
-    let symbols = getSymbols()
-
-    return sendGetRateRequest(base, symbols)
-      .then((resp) => resp.json(), error => dispatch(getRateFailure(error.message)))
-      .then((data) => dispatch(getRateSuccess(data)))
-  }
-}
-
 const getSymbols = () => {
   return Object.keys(configs.currency).reduce((acc, currCode) => {
     let currName = configs.currency[currCode]
@@ -106,21 +63,6 @@ const getSymbols = () => {
 }
 
 
-export const getFeeRate = () => {
-  let symbols = getSymbols()
-
-  return (dispatch, getState) => {
-    let base = configs.currency[configs.exchange.EXCHANGE_BASE_CODE]
-
-    dispatch(getFeeRateStart())
-
-    return sendGetRateRequest(base, symbols)
-      .then((resp) => resp.json())
-      .then((data) => dispatch(getFeeRateSuccess(data)))
-      .catch(e => { dispatch(getFeeRateFailure(e)) })
-  }
-}
-
 export const caculateFeeRate = () => {
 
   return (dispatch, getState) => {
@@ -128,11 +70,11 @@ export const caculateFeeRate = () => {
     let storeState = getState()
     let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
     let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
+    let fromCurrencyCode = _get(storeState.currency, 'exchangeFrom.currencyCode')
     let exchangeAmount = _get(storeState.currency, 'exchangeFrom.exchangeAmount')
-    let rates = _get(storeState, 'exchange.data.rates', {})
-    let feeRates = _get(storeState, 'fee.data.rates', {})
+    let rates = _get(storeState, `exchange.data.${fromCurrencyCode}.rates`, {})
+    let feeRates = _get(storeState, `exchange.data.${configs.exchange.EXCHANGE_BASE_CODE}.rates`, {})
     let isExchangeFromFocused = storeState.currency.isExchangeFromFocused
-
     return Promise.resolve(fx.rates = Object.assign({}, rates))
     .then(() => {
       if (exchangeAmount > 0)
@@ -141,6 +83,7 @@ export const caculateFeeRate = () => {
         return 0
     })
     .then((expectAmount) => {
+
       fx.rates = Object.assign({}, feeRates)
       return expectAmount
     })
@@ -148,13 +91,13 @@ export const caculateFeeRate = () => {
       let target = isExchangeFromFocused ? toCurrency : fromCurrency
       let chargable = expectAmount - configs.exchange.FREE_EXCHANGE_LIMIT
       let feeInBase = chargable * configs.exchange.EXCHANGE_FEE_PERCENTAGE
-
       if (feeInBase > 0)
         return fx(feeInBase).from(feeBase).to(target)
       else
         return 0
     })
     .then((fee) => {
+
       return fee > 0 ? numeral(fee).format('0.00') : ''
     })
     .then((feeToShow) => {
@@ -171,6 +114,7 @@ export const sendGetRateRequest = (base, symbols) => {
       + `?access_key=${configs.exchange.APP_ID}`
       + `&base=${base}`
       + `&symbols=${symbols}`)
+      .then((resp) => resp.json())
 }
 
 export const getRateTimerStart = () => {
@@ -187,11 +131,23 @@ export const getRateTimerStart = () => {
 }
 
 export const sendGetRatesRequest = () => {
-  return (dispatch) => {
+
+  return (dispatch, getState) => {
+    let storeState = getState()
+    let symbols = getSymbols()
+
     return Promise.all([
-      dispatch(getFeeRate()),
-      dispatch(getRate())
+      sendGetRateRequest('GBP', symbols),
+      sendGetRateRequest('EUR', symbols),
+      sendGetRateRequest('USD', symbols)
     ])
+      .then((data) => {
+        dispatch(getRateSuccess(data))
+      })
+      .catch((error) => {
+        dispatch(getRateFailure(error))
+      })
+      
   }
 }
 

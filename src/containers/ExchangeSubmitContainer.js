@@ -6,13 +6,9 @@ import { get as _get } from 'lodash'
 
 
 const mapStateToProps = state => {
-  let sourceCurrencyName = _get(state.currency, 'exchangeFrom.currencyName')
-  let matchBase = _get(state.exchange, 'data.base') === sourceCurrencyName
-  let rates = matchBase ? _get(state.exchange, 'data.rates', {}) : {}
-  let targetCurrencyName = _get(state.currency, 'exchangeTo.currencyName')
-  let targetRate = _get(rates, targetCurrencyName)
-  let exchangeAmount = _get(state.currency, 'exchangeFrom.exchangeAmount')
   let currencyCode = _get(state.currency, 'exchangeFrom.currencyCode')
+  let targetRate = _get(state.exchange, `data.${currencyCode}.rates`)
+  let exchangeAmount = _get(state.currency, 'exchangeFrom.exchangeAmount')
   let balance = _get(state.currency, `exchangeFrom.balance.${currencyCode}`)
   return {
     enableExchangeBtn: (targetRate

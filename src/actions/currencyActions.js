@@ -71,13 +71,9 @@ export const handleFromCurrencyChanged = (currencyCode) => {
         if (isSwap)
           return dispatch(currencyToSwitched(exchangeFrom))
       })
-      .then(() => dispatch(sendGetRatesRequest()))
       .then(() => {
-        if (isSwap) {
           return isExchangeFromFocused ? dispatch(handleFromAmountInput(exchangeFromAmount)) : 
-            dispatch(handleToAmountInput(exchangeToAmount))
-        }
-        
+            dispatch(handleToAmountInput(exchangeToAmount))        
       })
   }
 }
@@ -100,13 +96,9 @@ export const handleToCurrencyChanged = (currencyCode) => {
         if (isSwap)
           return dispatch(currencyFromSwitched(exchangeTo))
       })
-      .then(() => dispatch(sendGetRatesRequest()))
       .then(() => {
-        if (isSwap) {
           return isExchangeFromFocused ? dispatch(handleFromAmountInput(exchangeFromAmount)) : 
-            dispatch(handleToAmountInput(exchangeToAmount))
-        }
-        
+            dispatch(handleToAmountInput(exchangeToAmount))        
       })
   }
 }
@@ -127,20 +119,12 @@ export const handleToAmountFocus = () => {
   return { type: FOCUS_TO_AMOUNT }
 }
 
-const getTargetRate = (storeState) => {
-  let sourceCurrencyName = _get(storeState.currency, 'exchangeFrom.currencyName')
-  let matchBase = _get(storeState.exchange, 'data.base') === sourceCurrencyName
-  let rates = matchBase ? _get(storeState.exchange, 'data.rates', {}) : {}
-  let targetCurrencyName = _get(storeState.currency, 'exchangeTo.currencyName')
-  let targetRate = _get(rates, targetCurrencyName)
-  return targetRate
-}
-
 export const caculateTargetAmount = () => {
   return (dispatch, getState) => {
     let storeState = getState()
     let exchangeAmount = _get(storeState.currency, 'exchangeFrom.exchangeAmount')
-    let rates = _get(storeState.exchange, 'data.rates')
+    let fromCurrencyCode = _get(storeState.currency, 'exchangeFrom.currencyCode')
+    let rates = _get(storeState.exchange, `data.${fromCurrencyCode}.rates`)
     let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
     let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
     let toCurrencyFee = _get(storeState.currency, 'exchangeTo.fee')
@@ -171,7 +155,8 @@ export const caculateSourceAmount = () => {
   return (dispatch, getState) => {
     let storeState = getState()
     let exchangeAmount = _get(storeState.currency, 'exchangeTo.exchangeAmount')
-    let rates = _get(storeState.exchange, 'data.rates')
+    let fromCurrencyCode = _get(storeState.currency, 'exchangeTo.currencyCode')
+    let rates = _get(storeState.exchange, `data.${fromCurrencyCode}.rates`)
     let fromCurrency = _get(storeState.currency, 'exchangeFrom.currencyName')
     let toCurrency = _get(storeState.currency, 'exchangeTo.currencyName')
     let fromCurrencyFee = _get(storeState.currency, 'exchangeFrom.fee')
@@ -196,36 +181,20 @@ export const caculateSourceAmount = () => {
 
 export const handleFromAmountInput = (exchangeAmount) => {
 
-  return (dispatch, getState) => {
+  return (dispatch) => {
 
-    return new Promise((resolve, reject) => {
-      if (getTargetRate(getState()))
-        resolve(dispatch(updateSourceAmount(exchangeAmount)))
-      else {
-        setTimeout(() => {
-          dispatch(handleFromAmountInput(exchangeAmount))
-        }, 1000 * configs.exchange.RETRY_FREQUENCY)
-      }
-    })
-    .then(() => dispatch(caculateTargetAmount()))
+    return Promise.resolve(dispatch(updateSourceAmount(exchangeAmount)))
+      .then(() => dispatch(caculateTargetAmount()))
 
   }
 }
 
 export const handleToAmountInput = (exchangeAmount) => {
   
-  return (dispatch, getState) => {
+  return (dispatch) => {
 
-    return new Promise((resolve, reject) => {
-      if (getTargetRate(getState()))
-        resolve(dispatch(updateTargetAmount(exchangeAmount)))
-      else {
-        setTimeout(() => {
-          dispatch(handleToAmountInput(exchangeAmount))
-        }, 1000 * configs.exchange.RETRY_FREQUENCY)
-      }
-    })
-    .then(() => dispatch(caculateSourceAmount()))
+    return Promise.resolve(dispatch(updateTargetAmount(exchangeAmount)))
+      .then(() => dispatch(caculateSourceAmount()))
   }
 }
 

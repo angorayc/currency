@@ -1,5 +1,5 @@
 import * as actions from '../actions/exchangeActions'
-
+import { get as _get } from 'lodash'
 const exchangeRate = function(state = { data: null, error: null }, action) {
   switch (action.type) {
     case actions.GET_RATE_START:
@@ -9,14 +9,16 @@ const exchangeRate = function(state = { data: null, error: null }, action) {
       }
     case actions.GET_RATE_SUCCESS:
     {
-      let rates = action.data.rates || {}
-      let fixed = {}
-      Object.keys(rates).forEach((currencyCode) => {
-        fixed[currencyCode] = Number.parseFloat(rates[currencyCode]).toFixed(4)
+      let fixed = (action.data || []).map((base) => {
+
+        Object.keys(base.rates || {}).forEach((currencyCode) => {
+          base.rates[currencyCode] = Number.parseFloat(base.rates[currencyCode]).toFixed(4)
+        })
+        return base
       })
-      action.data.rates = fixed
+      
       return {
-        data: action.data || {},
+        data: fixed || [],
         error: null
       }
     }

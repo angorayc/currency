@@ -2,16 +2,18 @@ import { connect } from 'react-redux'
 import ExchangeRate from '../components/ExchangeRate'
 import { getRateTimerStart, getRateTimerStop } from '../actions/exchangeActions'
 import { swapCurrency } from '../actions/currencyActions'
+import { get as _get } from 'lodash'
 
 const mapStateToProps = state => {
   let exchangeFrom = state.currency.exchangeFrom
   let sourceCurrencyName = exchangeFrom.currencyName
-  let data = state.exchange.data || {}
+  let currencyCode = exchangeFrom.currencyCode
+  let data = _get(state.exchange, `data.${currencyCode}`, {})
   let matchBase = data.base === sourceCurrencyName
   let rates = matchBase ? data.rates : {}
   let targetCurrencyName = state.currency.exchangeTo.currencyName
   return {
-    exchangeRate: rates[targetCurrencyName],
+    exchangeRate: _get(rates, targetCurrencyName, ''),
     currencyFromName: sourceCurrencyName,
     currencyToName: targetCurrencyName
   }
