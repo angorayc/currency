@@ -1,4 +1,4 @@
-import { caculateFeeRate, caculationError, sendGetRatesRequest } from './exchangeActions'
+import { caculateFeeRate, caculationError } from './exchangeActions'
 import configs from '../configs'
 import { get as _get } from 'lodash'
 import numeral from 'numeral'

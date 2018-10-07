@@ -39,7 +39,7 @@ class ExchangeLimitDialog extends React.Component {
       <Dialog onClose={this.handleClose} aria-labelledby="simple-dialog-title" {...other}>
         <DialogTitle id="simple-dialog-title" className={classes.listCenter}>FX exchange limit fee</DialogTitle>
         <DialogContent>
-          <p className={classes.listCenter}>You've reached your free exchange limit of <span className="EUR">5,000</span> per month.
+          <p className={classes.listCenter}>You've reached your free exchange limit of <span className="GBP">5,000</span> per month.
           Further accumulative cross-currency transactions will incur 0.5% fee.</p>
           <p className={classes.listCenter}>Upgrade to Premium to get unlimited free exchanges</p>
         </DialogContent>

@@ -133,7 +133,6 @@ export const getRateTimerStart = () => {
 export const sendGetRatesRequest = () => {
 
   return (dispatch, getState) => {
-    let storeState = getState()
     let symbols = getSymbols()
 
     return Promise.all([

@@ -1,5 +1,5 @@
 import * as actions from '../actions/exchangeActions'
-import { get as _get } from 'lodash'
+
 const exchangeRate = function(state = { data: null, error: null }, action) {
   switch (action.type) {
     case actions.GET_RATE_START:
