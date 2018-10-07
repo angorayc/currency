@@ -112,11 +112,21 @@ export const updateTargetAmount = (exchangeAmount) => {
 }
 
 export const handleFromAmountFocus = () => {
-  return { type: FOCUS_FROM_AMOUNT }
+  return (dispatch, getState) => {
+    dispatch({ type: FOCUS_FROM_AMOUNT })
+    let storeState = getState()
+    let exchangeAmount = _get(storeState.currency, 'exchangeFrom.exchangeAmount', '')
+    return dispatch(handleFromAmountInput(exchangeAmount))
+  }
 }
 
 export const handleToAmountFocus = () => {
-  return { type: FOCUS_TO_AMOUNT }
+  return (dispatch, getState) => {
+    dispatch({ type: FOCUS_TO_AMOUNT })
+    let storeState = getState()
+    let exchangeAmount = _get(storeState.currency, 'exchangeTo.exchangeAmount', '')
+    return dispatch(handleToAmountInput(exchangeAmount))
+  }
 }
 
 export const caculateTargetAmount = () => {
