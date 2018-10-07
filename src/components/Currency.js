@@ -171,7 +171,7 @@ class Currency extends React.Component {
     })
     let minAmount = showMinAmountHint ? numeral(configs.exchange.MIN_EXCHANGE_AMOUNT).format('0.00') : ''
     let displayFee = showFee? numeral(fee || 0).format('0,0.00') : ''
-
+    let displayBalance = balance ? Number(balance).toFixed(2) : 0
     return (
       <div className={rootClasses}>
         <List component="nav">
@@ -187,7 +187,7 @@ class Currency extends React.Component {
                   
                 </NativeSelect>
                 <FormHelperText className={balanceClassNames}>
-                  Balance: <span className={currencyName}>{balance}</span>
+                  Balance: <span className={currencyName}>{displayBalance}</span>
                 </FormHelperText>
               </FormControl>
             </Grid>
